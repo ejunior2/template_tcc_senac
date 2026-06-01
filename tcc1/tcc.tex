@@ -63,13 +63,13 @@
 % ---------------------------------------------------------------
 % INFORMAÇÕES DO DOCUMENTO
 % ---------------------------------------------------------------
-\titulo{Otimização Inteligente de Rotas no Senac Considerando Qualidade de Wi-Fi: Uma Comparação entre Algoritmo de Grafos e Inteligência Artificial} %Trocar titulo
+\titulo{Otimização de Rotas Internas no Senac Considerando a Qualidade do Wi-Fi: Uma Comparação entre Algoritmo de Grafos e Inteligência Artificial} %Trocar titulo
 \autor{
 André Luis Ferreira de Oliveira \\
 Edinaldo Matias dos Santos Junior}
 \local{São Paulo}
 \data{2026}
-\orientador{Prof. Afonso Lelis}
+\orientador{Prof. Thyago Quintad}
 % \coorientador{Prof. Nome do Coorientador} % Descomente se houver coorientador
 
 \instituicao{%
@@ -159,7 +159,14 @@ Este documento apresenta a proposta inicial do Trabalho de Conclusão de Curso (
 \chapter{Introdução}
 \label{cap:introducao}
 
-A introdução deve apresentar o tema do trabalho de forma clara e objetiva, situando o leitor no contexto da pesquisa. Neste capítulo, são apresentados o contexto no qual o problema se insere, a justificativa para a realização do estudo e os objetivos que norteiam o desenvolvimento do trabalho.
+O sistema de posicionamento e navegação em ambientes externos (Outdoor) consolidou-se como uma tecnologia altamente eficiente, fornecendo a localização precisa de objetos e usuários por meio de sinais de satélite, como o Sistema de Posicionamento Global (GPS). No entanto, esse método opera de forma eficaz apenas em áreas abertas com linha de visão direta. Quando o usuário adentra edifícios, os sinais sofrem interferência severa ou bloqueio completo por paredes e telhados, tornando o GPS ineficaz para navegação interna (CHIA et al., 2025).
+
+Para solucionar a navegação nesses espaços fechados, Štancel et al. (2021) afirmam que o mundo real pode ser mapeado computacionalmente através de um grafo de vértices e arestas. A partir dessa modelagem, algoritmos clássicos de teoria dos grafos, como Dijkstra e A*, são muito bem-sucedidos ao definir a menor rota para redes com custos de arestas estáticos. Entretanto, no contexto prático real, os custos das arestas mudam dinamicamente.
+
+Sendo assim essas abordagens tradicionais apresentam várias limitações nesses cenários onde o usuário terá sua rota determinada a fim de evitar ficar preso no trânsito, ou manter uma conectividade Wi-Fi (PHAM et al., 2025).
+
+Os mesmos autores sugerem que algoritmos baseados em aprendizado por reforço computam ótimos resultados quando tratamos de redes que mudam dinamicamente. Dessa forma, este estudo propõe realizar um comparativo prático no Centro Universitário Senac entre o algoritmo determinístico de Dijkstra e um modelo de Inteligência Artificial (IA) baseado em Aprendizado por Reforço (RL), utilizando como pesos das arestas a distância física (metros) e a qualidade do sinal baseada no Received Signal Strength Indicator (RSSI).
+
 
 % ---------------------------------------------------------------
 \section{Contexto}
@@ -169,22 +176,20 @@ A introdução deve apresentar o tema do trabalho de forma clara e objetiva, sit
 
 %Descreva o ambiente ou domínio em que o problema ocorre, utilizando dados e referências que comprovem a existência do problema. Explique quem são os principais afetados e quais são as consequências de não resolvê-lo.
 
-O tema surge ao observarmos a baixa conectividade de Wi-Fi no campus do Senac Santo Amaro e imaginar uma aplicação
- com algoritmos de grafos que otimize a transição entre pontos do senac, garantindo uma boa conectividade com 
- Wi-Fi em todo o trajeto
-A ideia é ultilizar um algoritmo de grafos otimizado para encontrar a menor rota entre dois pontos, tendo como peso
-das arestas a conexão Wi-Fi e a distância entre os vertices.
-Após uma coleta de dados, será treinado um modelo de Inteligência Artificial, que fará previsões da melhor 
-rota possível, dado um ponto de origem e um ponto de destino.
-Por fim e não menos importante, será realizada uma comparação entre o algoritmo de grafos otimizado e a 
-Inteligência Artificial, com base nos seguintes indicadores:\newline
-- Passos/metros \newline
-- dBm (decibel-miliwatt)\newline
-- Número de pontos com Wi-Fi fraco \newline
-(Conta quantos pontos da rota têm sinal abaixo de um limite que será definido).\newline
-- Tempo de execução dos dois métodos (Segundos)\newline
-- Variância do sinal Wi-Fi.\newline
-- Similaridade entre rotas (Mede quanto a rota da IA se aproxima da rota ótima do algoritmo em porcentagem).\newline
+\section{Contexto}
+\label{sec:contexto}
+
+O desenvolvimento de sistemas de posicionamento e navegação revolucionou a mobilidade e a interação espacial na sociedade contemporânea. Em ambientes externos (\textit{outdoor}), tecnologias baseadas em constelações de satélites, como o Sistema de Posicionamento Global (GPS), consolidaram-se como soluções altamente eficientes para o rastreamento preciso de usuários. No entanto, a eficácia desse método restringe-se a áreas abertas com linha de visão direta. Quando o indivíduo adentra edifícios e complexos arquitetônicos fechados, os sinais de rádio sofrem interferência severa ou bloqueio total por estruturas físicas, como paredes e lajes, tornando o GPS ineficaz para a navegação interna (\textit{indoor}) (CHIA \textit{et al.}, 2025).
+
+Para viabilizar o deslocamento nesses espaços fechados, a literatura e a indústria têm recorrido a infraestruturas locais preexistentes, com destaque para a utilização de redes sem fio (Wi-Fi). Computacionalmente, o ambiente físico de uma instituição pode ser mapeado e abstraído por meio de uma estrutura de grafos, composta por vértices e arestas que representam os cruzamentos e os corredores (ŠTANCEL \textit{et al.}, 2021). Para quantificar o peso ou custo dessas arestas visando a manutenção da conectividade, a métrica de Indicador de Força do Sinal Recebido (RSSI), expressa em decibéis por miliwatt (dBm), estabeleceu-se como um padrão de medição. 
+
+Entretanto, o domínio físico em que esse sistema opera caracteriza-se por ser um Ambiente Dinâmico (DE - \textit{Dynamic Environment}). Em instituições de grande porte, o fluxo estocástico de pessoas, a movimentação de mobiliário, o ruído eletromagnético e a interferência de múltiplos caminhos (\textit{multipath interference}) causam flutuações constantes na propagação do sinal. Consequentemente, a força do sinal Wi-Fi torna-se altamente vulnerável à atenuação, resultando em uma métrica de custo dinâmico e instável (CHIA \textit{et al.}, 2025).
+
+A existência desse fenômeno dinâmico expõe uma lacuna crítica nas abordagens computacionais de roteamento. Algoritmos clássicos da teoria dos grafos, como o método de Dijkstra, são amplamente utilizados e comprovadamente ótimos para definir a menor rota em redes onde os custos das arestas são estáticos. Contudo, em um cenário prático e real, as abordagens determinísticas tradicionais apresentam limitações severas, pois são incapazes de adaptar o roteamento de forma reativa a custos de ligação que mudam em tempo real (PHAM \textit{et al.}, 2025).
+
+A incapacidade de resolver essa assimetria entre algoritmos estáticos e ambientes dinâmicos afeta diretamente os usuários finais que dependem de navegação assistida e conectividade ininterrupta em amplas instalações. A principal consequência de ignorar essas flutuações é a geração de rotas que, apesar de geograficamente mais curtas, direcionam o indivíduo para "zonas de sombra" ou áreas de alta atenuação de rede.
+
+Diante desse cenário, o estudo de métodos adaptativos evidencia sua relevância. Para a sociedade, garante uma experiência de navegação contínua e conectada. Para a Ciência da Computação, preenche a lacuna metodológica identificada na literatura atual, investigando como técnicas emergentes de Inteligência Artificial --- especificamente o Aprendizado por Reforço, capaz de lidar com a dinamicidade de redes de forma autônoma --- podem superar os limites dos algoritmos estáticos no roteamento em ambientes complexos.
 
 \vspace{0.3cm}
 \noindent\fbox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{%
@@ -224,29 +229,14 @@ A revisão bibliográfica não consiste em simplesmente listar os trabalhos enco
 \section{Justificativa}
 \label{sec:justificativa}
 
-Explicite por que resolver esse problema é importante. A justificativa deve abordar:
-
+A motivação para o desenvolvimento deste trabalho fundamenta-se na necessidade de adequar os sistemas de roteamento \textit{indoor} à realidade estocástica das infraestruturas de rede modernas. Historicamente, o problema de caminhos mínimos tem sido tratado sob uma ótica estática, o que se mostra insuficiente frente às flutuações inerentes a ambientes com alta circulação. Diante disso, a pertinência desta pesquisa sustenta-se sob três pilares fundamentais: a identificação de uma lacuna na literatura, a sua relevância acadêmica e a sua aplicabilidade prática.
 \begin{itemize}
-    \item \textbf{Relevância acadêmica}: O fato de que otimização de rotas é um problema resolvido de modo geral
-    com algoritmos de grafo, permite explorar uma nova abordagem pouco implementeda, que é a utilização de frequência
-    de Wi-Fi como peso para a decisão de ir ao próximo vertice e a ultilização de IA treinada para decidir a melhor rota,
-    sem a dependência um algoritmo, usado convencionalmente quando tratamos de otimização de rotas.
+    \item \textbf{Relevância acadêmica}: Este trabalho contribui diretamente para o avanço do conhecimento na intersecção entre a Teoria dos Grafos e a Inteligência Artificial. Ao propor um comparativo empírico entre um algoritmo determinístico clássico (Dijkstra) e um modelo adaptativo (Q-Learning) sob a aplicação de princípios de engenharia de caos, a pesquisa não se limita a revisar conceitos existentes. Ela fornece dados práticos sobre o comportamento, a convergência e a resiliência de modelos de RL na mitigação de flutuações do sinal RSSI. Essa abordagem eleva a discussão acadêmica ao demonstrar como a variabilidade do ambiente pode ser tratada matematicamente não como um ruído impeditivo, mas como uma variável de custo penalizadora na função de recompensa de um agente inteligente.
 
-    \item \textbf{Relevância prática/profissional}: A solução proposta traz benefícios diretos para usuários e 
-    instituições ao permitir a identificação e utilização de rotas com melhor qualidade de conexão Wi-Fi dentro 
-    do campus. Para os usuários, isso possibilita uma experiência mais estável ao acessar conteúdos online, 
-    participar de aulas remotas, utilizar sistemas acadêmicos e realizar atividades que dependem de conectividade 
-    contínua.\newline
+    \item \textbf{Relevância prática/profissional}: No âmbito aplicado, os benefícios gerados por esta solução impactam diretamente a experiência dos usuários e a gestão de infraestrutura de instituições de grande porte. O desenvolvimento de um sistema de roteamento inteligente permitirá que transeuntes --- sejam alunos, funcionários ou visitantes do Centro Universitário Senac --- desloquem-se pelas dependências do campus de maneira otimizada. A solução proposta garante não apenas a indicação do caminho fisicamente viável, mas, primordialmente, a manutenção da conectividade com a internet durante todo o trajeto. Evitar a transição por "zonas de sombra" previne a interrupção de aplicações em tempo real, chamadas de vídeo e transmissões de dados, agregando um valor operacional direto para a comunidade e servindo como um modelo escalável para hospitais, aeroportos e polos corporativos.
 
-    Para a instituição, a ferramenta pode servir como apoio na gestão da infraestrutura de rede, 
-    auxiliando na identificação de áreas com baixa cobertura e orientando investimentos em melhorias. 
-    Além disso, a aplicação pode contribuir para a otimização do uso dos espaços físicos, promovendo 
-    maior eficiência no deslocamento de alunos e colaboradores.
-
-    \item \textbf{Lacuna identificada}: o que ainda não foi resolvido ou explorado suficientemente pelos trabalhos existentes.
+    \item \textbf{Lacuna identificada}: A revisão da literatura atual revela uma escassez significativa de estudos que abordem o roteamento físico sob a perspectiva dos Ambientes Dinâmicos (DE). Conforme apontado por Chia \textit{et al.} (2025), a grande maioria das pesquisas sobre posicionamento \textit{indoor} baseado em Wi-Fi ignora as flutuações contínuas do ambiente, assumindo premissas de estabilidade que não se verificam no mundo real. Paralelamente, embora os métodos de Aprendizado por Reforço (RL) sejam amplamente consolidados para o cálculo de rotas dinâmicas em redes lógicas de computadores, o seu potencial para redes de transporte físico e navegação humana começou a atrair atenção apenas recentemente (PHAM \textit{et al.}, 2025). Desse modo, carece-se de estudos empíricos que unam essas técnicas de Inteligência Artificial à otimização de caminhos guiados por fatores dinâmicos de infraestrutura.
 \end{itemize}
-
-Mostre que o trabalho não é apenas um texto sobre um tema popular, mas sim uma proposta que visa preencher uma lacuna real e contribuir de forma significativa para a área.
 
 % ---------------------------------------------------------------
 \section{Objetivo}
@@ -256,9 +246,7 @@ Os objetivos definem o que o trabalho pretende alcançar. Devem ser claros, mens
 
 \subsection{Objetivo principal}
 
-O objetivo principal deve ser \textbf{único} e sintetizar o propósito central do trabalho em uma frase direta. Ele deve responder à pergunta: \textit{o que este trabalho pretende resolver ou alcançar?}
-
-Exemplo: \textit{Desenvolver um sistema web para gerenciamento de tarefas acadêmicas que permita aos estudantes organizar suas atividades de forma colaborativa.}
+Comparar a eficácia do algoritmo determinístico de Dijkstra com um modelo de Inteligência Artificial baseado em Aprendizado por Reforço (\textit{Q-Learning}) na otimização de rotas internas no Centro Universitário Senac, utilizando a qualidade e a estabilidade do sinal Wi-Fi (RSSI) como variável de custo dinâmico.
 
 \textbf{Dica}: utilize verbos no infinitivo como \textit{desenvolver}, \textit{analisar}, \textit{propor}, \textit{avaliar}, \textit{implementar}, \textit{comparar}, entre outros. Evite verbos vagos como \textit{estudar} ou \textit{entender}.
 
@@ -267,11 +255,11 @@ Exemplo: \textit{Desenvolver um sistema web para gerenciamento de tarefas acadê
 Os objetivos secundários são desdobramentos do objetivo principal. Eles descrevem as etapas ou ações necessárias para atingir o objetivo principal. Devem ser mensuráveis e verificáveis.
 
 \begin{enumerate}
-    \item Realizar levantamento bibliográfico sobre [tema específico];
-    \item Identificar e analisar os requisitos do sistema/solução proposta;
-    \item Projetar a arquitetura da solução com base nos requisitos levantados;
-    \item Implementar um protótipo funcional da solução proposta;
-    \item Validar a solução por meio de [testes, métricas, estudo de caso, etc.].
+\item Realizar o mapeamento topológico da planta baixa do Centro Universitário Senac, convertendo os corredores e cruzamentos da instituição em uma rede de grafos navegável;
+    \item Coletar e compilar um banco de dados empírico contendo as aferições reais da potência do sinal Wi-Fi (RSSI) no ambiente estudado, mapeando as flutuações em diferentes períodos de fluxo e ocupação;
+    \item Implementar o algoritmo clássico de Dijkstra para o roteamento na rede, adotando a métrica de distância física combinada com a média estática do RSSI como peso fixo das arestas;
+    \item Implementar o algoritmo de \textit{Q-Learning}, realizando a modelagem matemática do ambiente (estados, ações e função de custo/recompensa) para que o agente autônomo aprenda interativamente a contornar rotas de baixa conectividade;
+    \item Avaliar e comparar o desempenho de ambas as abordagens computacionais em cenários estáticos (ordem) e dinâmicos (caos), com base nos critérios de completude, grau de otimização, complexidade de tempo e complexidade de espaço.
 \end{enumerate}
 
 \textbf{Atenção}: cada objetivo secundário deve contribuir diretamente para o alcance do objetivo principal. Evite listar objetivos que não tenham relação clara com o problema.
@@ -288,45 +276,110 @@ A revisão bibliográfica tem como finalidade apresentar o embasamento teórico 
 \section{Referencial teórico}
 \label{sec:referencial}
 
-Apresente os principais conceitos, teorias e definições que fundamentam o trabalho. O referencial teórico deve fornecer ao leitor a base necessária para compreender o problema e a solução proposta.
+\subsection{Navegação \textit{Indoor}, Wi-Fi e a Métrica RSSI}
 
-Organize esta seção por temas ou conceitos, não por autor. Cada subseção deve abordar um conceito relevante, explicando-o e relacionando-o ao contexto do trabalho.
+A complexidade de localizar e guiar usuários em ambientes fechados difere drasticamente da navegação \textit{outdoor}. Enquanto espaços abertos dependem do Sistema de Posicionamento Global (GPS), a infraestrutura \textit{indoor} exige tecnologias locais devido à severa atenuação que os sinais de satélite sofrem ao atravessar barreiras arquitetônicas. Para contornar esse desafio tecnológico, Štancel \textit{et al.} (2021) afirmam que o sinal Wi-Fi desponta como a tecnologia viável mais proeminente, permitindo o posicionamento em aeroportos, garagens e campi universitários sem a necessidade de infraestrutura de hardware adicional no dispositivo do usuário.
 
-Por exemplo: se o trabalho envolve desenvolvimento web, aborde conceitos como arquitetura cliente-servidor, APIs REST, padrões de projeto, etc. Se envolve inteligência artificial, explique os algoritmos e técnicas que serão utilizados.
+A principal métrica extraída dessa rede é o \textit{Received Signal Strength Indicator} (RSSI), que quantifica a força do sinal recebido por um dispositivo móvel. O valor do RSSI é expresso em decibéis por miliwatt (dBm) e é comumente lido em espectros negativos, onde valores mais próximos de zero indicam maior qualidade de conexão. 
 
-Utilize citações para fundamentar cada conceito apresentado. Segundo \citeonline{Wazlawick2020}, o referencial teórico deve demonstrar que o autor domina os fundamentos necessários para conduzir a pesquisa.
+Contudo, a literatura aponta que a estabilidade dessa métrica é altamente vulnerável. Segundo Chia \textit{et al.} (2025), espaços internos fechados e com alto fluxo de usuários são classificados como Ambientes Dinâmicos (DE - \textit{Dynamic Environments}). Nesses cenários, fatores físicos --- como o bloqueio do sinal pela circulação de massas humanas --- e de rede --- como colisões de pacotes e interferência de múltiplos caminhos (\textit{multipath interference}) --- geram flutuações constantes e quedas abruptas no nível do RSSI.
 
+\subsection{Teoria dos Grafos e o Algoritmo de Dijkstra}
+
+Para que a navegação seja computacionalmente viável, o ambiente físico deve ser abstraído em uma estrutura matemática de grafos. Dessa forma, corredores e salas são representados como vértices (nós), e os caminhos que os conectam são representados como arestas (ligações), atribuindo-se um peso matemático a cada trajeto.
+
+Nesse modelo, o algoritmo de Dijkstra, proposto originalmente em 1959, é o padrão-ouro para a determinação de caminhos mínimos em grafos ponderados (DIJKSTRA, 1959). O algoritmo expande os nós a partir de um vértice de origem, acumulando e validando os menores custos até alcançar os demais vértices do grafo, sob a condição de que os pesos das arestas sejam não negativos.
+
+Apesar de sua excelência e completude matemática, o algoritmo de Dijkstra foi concebido para redes determinísticas, onde o custo da ligação é estático (como a distância em metros). No contexto prático de um Ambiente Dinâmico (DE), onde o peso da aresta inclui a qualidade variável do sinal Wi-Fi, o custo muda continuamente. Para manter a rota ótima frente a uma queda de sinal, o algoritmo tradicional demandaria recálculos iterativos completos da árvore de caminhos, gerando uma sobrecarga de processamento incompatível com o redirecionamento contínuo em tempo real (PHAM \textit{et al.}, 2025).
+
+\subsection{Inteligência Artificial e Aprendizado por Reforço no Roteamento}
+
+Para solucionar a incapacidade dos métodos clássicos em lidar com o "caos" dos ambientes dinâmicos, a pesquisa recorre à Inteligência Artificial (IA), com foco estrito no Aprendizado por Reforço (RL - \textit{Reinforcement Learning}). É imperativo distinguir essa abordagem de outras ramificações da IA, como o Aprendizado Profundo (\textit{Deep Learning}). Enquanto as redes neurais são frequentemente usadas no problema de reconhecimento de posições passivas (\textit{Fingerprinting}), o RL é projetado especificamente para a tomada de decisão sequencial e ativa em ambientes com incertezas.
+
+Conforme a literatura recente sobre estimação de rotas, os métodos baseados em RL não necessitam conhecer os custos de ligação de antemão para iniciar a operação em uma rede que muda dinamicamente (PHAM \textit{et al.}, 2025). O sistema computacional atua como um agente que mapeia e aprende os caminhos ótimos estritamente por meio de tentativa, erro e interação contínua com o ambiente. Em cenários estocásticos, a aplicação de RL permite que a navegação se adapte em tempo real, mitigando a variabilidade do ambiente sem o alto custo computacional do recálculo estático.
+
+\subsection{Algoritmo Q-Learning, Roteamento Q e Tabela Q}
+
+Dentro do paradigma do Aprendizado por Reforço, o modelo matemático central deste trabalho é o algoritmo \textit{Q-Learning}. Proposto originalmente por Watkins (1989) e amplamente formalizado por Sutton e Barto (2018), trata-se de um algoritmo livre de modelo (\textit{model-free}), que dispensa o conhecimento prévio das probabilidades de transição do ambiente. Ele descobre a política ótima de forma iterativa, avaliando a função de Qualidade (o "Q" de \textit{Quality}) de tomar uma determinada ação ($a$) partindo de um determinado estado ($s$).
+
+Quando o \textit{Q-Learning} é aplicado especificamente para a descoberta de rotas em estruturas de grafos ou redes de transporte, a literatura denomina a técnica como Roteamento Q (\textit{Q-Routing}) (BOYAN; LITTMAN, 1994). O núcleo matemático desse algoritmo reside em uma estrutura matricial conhecida como Tabela Q (\textit{Q-Table}). Nesta matriz, as linhas representam os nós do grafo (corredores) e as colunas representam as transições possíveis. Em cada célula, armazena-se um valor $Q(s, a)$, que reflete a expectativa de custo/recompensa cumulativa daquele trajeto. Neste trabalho, essa Função de Custo integra a atenuação do sinal (RSSI) e a distância física.
+
+O referencial teórico indica que a excelência do Roteamento Q manifesta-se através de suas duas fases de execução (SUTTON; BARTO, 2018):
+\begin{itemize}
+    \item \textbf{Fase \textit{Offline} (Treinamento/Exploração):} O agente percorre a rede computacional em múltiplos episódios simulados. Ao sofrer penalidades em caminhos com ruído ou quedas de sinal Wi-Fi, o algoritmo preenche as células da Tabela Q, aprendendo as características flutuantes da rede por meio de recompensas e punições.
+    \item \textbf{Fase \textit{Online} (Execução/Inferência):} Uma vez consolidada a "memória" da Tabela Q, o roteamento real ocorre de forma imediata. Para traçar desvios, o agente necessita apenas consultar o maior valor $Q$ disponível na matriz, operando com uma complexidade de tempo $O(1)$. 
+\end{itemize}
 % ---------------------------------------------------------------
 \section{Metodologia da pesquisa bibliográfica}
 \label{sec:metodologia_pesquisa}
 
-Descreva como a pesquisa bibliográfica foi conduzida, incluindo:
+A seguir são apresentados os principais tópicos que nortearam a condução desta pesquisa:
 
 \begin{itemize}
-    \item \textbf{Bases de dados consultadas}: Google Scholar, IEEE Xplore, ACM Digital Library, SciELO, Periódicos CAPES, entre outras;
-    \item \textbf{Palavras-chave utilizadas}: liste os termos de busca em português e inglês;
-    \item \textbf{Critérios de inclusão e exclusão}: quais critérios foram usados para selecionar ou descartar trabalhos (período, idioma, relevância, tipo de publicação);
-    \item \textbf{Período de abrangência}: intervalo de anos das publicações consultadas.
+    \item \textbf{Bases de dados consultadas}: Google Scholar, IEEE Xplore;
+    \item \textbf{Palavras-chave utilizadas}: 
+    \begin{itemize}
+        \item ("route optimization" OR "path planning" OR "shortest path") AND ("Wi-Fi signal strength" OR "wireless network quality" OR "RSSI") AND ("graph algorithms" OR "Dijkstra" OR "A*") AND ("artificial intelligence" OR "machine learning");
+        \item ("graph algorithms") AND ("artificial intelligence" OR "machine learning" OR "deep learning") AND ("Wi-Fi");
+        \item ("shortest path") AND ("graph algorithms") AND ("artificial intelligence" OR "machine learning" OR "deep learning") AND ("Wi-Fi").
+    \end{itemize}
+    \item \textbf{Critérios de inclusão e exclusão}: Os critérios de inclusão adotados foram: artigos que resolvem o mesmo problema central deste trabalho; estudos que descrevem detalhadamente a técnica utilizada e trazem métricas de desempenho. Como critérios de exclusão, foram descartados: trabalhos com tema diferente do problema estudado; estudos sem um método claro; e pesquisas com ausência de avaliação experimental;
+    \item \textbf{Período de abrangência}: Últimos 5 anos (publicações a partir de 2021).
 \end{itemize}
-
-Exemplo de descrição:
-
-\textit{A pesquisa bibliográfica foi realizada nas bases Google Scholar, IEEE Xplore e ACM Digital Library, utilizando as palavras-chave ``machine learning'', ``classificação de texto'' e ``processamento de linguagem natural''. Foram selecionados artigos publicados entre 2018 e 2025, em português e inglês, que abordassem diretamente técnicas de classificação automática de documentos.}
 
 % ---------------------------------------------------------------
 \section{Fundamentos}
 \label{sec:fundamentos}
 
-Aprofunde os conceitos técnicos que serão utilizados na solução proposta. Diferentemente do referencial teórico (que apresenta conceitos gerais), os fundamentos devem detalhar as tecnologias, algoritmos, frameworks ou metodologias específicas que serão empregados no desenvolvimento.
+Esta seção detalha as tecnologias, métricas e algoritmos específicos que serão empregados no desenvolvimento da solução de roteamento \textit{indoor}. Diferentemente da base teórica geral, os tópicos a seguir descrevem a modelagem matemática e estrutural que sustentará a implementação prática do comparativo entre o método determinístico e a Inteligência Artificial.
 
-Por exemplo:
+\subsection{Modelagem Topológica e Plataforma \textit{IndoorAtlas}}
+
+Para que os algoritmos computacionais possam calcular rotas físicas, o ambiente real do Centro Universitário Senac precisa ser abstraído matematicamente. Para essa digitalização, será utilizada a plataforma \textit{IndoorAtlas}, uma ferramenta especializada em serviços de posicionamento e mapeamento interno. 
+
+Através dessa plataforma, a planta baixa da instituição será convertida em um grafo direcionado $G = (V, A)$, onde:
 \begin{itemize}
-    \item Se o trabalho utiliza aprendizado de máquina, explique os algoritmos escolhidos (árvores de decisão, redes neurais, SVM, etc.);
-    \item Se o trabalho envolve desenvolvimento de software, descreva as tecnologias (linguagens, frameworks, bancos de dados);
-    \item Se envolve análise de dados, explique as métricas e técnicas estatísticas que serão aplicadas.
+    \item $V$ (Vértices): representam os pontos de interesse, salas, corredores e cruzamentos do prédio;
+    \item $A$ (Arestas): representam os caminhos navegáveis que conectam dois vértices adjacentes.
 \end{itemize}
 
-Utilize figuras, diagramas e tabelas para ilustrar conceitos quando apropriado.
+Essa representação estrutural servirá como o "tabuleiro" ou o "ambiente" sobre o qual ambos os algoritmos executarão suas simulações e cálculos.
+
+\subsection{A Função de Custo: Distância e RSSI}
+
+Em problemas de roteamento, cada aresta possui um custo (ou peso). No algoritmo tradicional, esse custo é puramente a distância física. Na modelagem deste trabalho, a Função de Custo integrará duas variáveis: a distância em metros e a atenuação do sinal Wi-Fi, medida pelo \textit{Received Signal Strength Indicator} (RSSI).
+
+O RSSI é medido em decibéis por miliwatt (dBm), operando em uma escala logarítmica negativa. Valores próximos a -30 dBm representam um sinal excelente, enquanto valores abaixo de -80 dBm indicam perda iminente de conectividade. Para a implementação computacional, esses valores brutos serão normalizados e transformados em uma métrica de penalidade: quanto pior for a estabilidade do sinal em um determinado corredor (aresta), maior será o "custo" de atravessá-lo, forçando o algoritmo a buscar caminhos alternativos.
+
+\subsection{Implementação do Algoritmo de Dijkstra}
+
+O algoritmo de Dijkstra será implementado como a abordagem de base (\textit{baseline}) deste estudo. Trata-se de um algoritmo de busca não informada que garante a descoberta do caminho de menor custo entre um nó de origem e todos os outros nós de um grafo, desde que os pesos das arestas sejam não negativos.
+
+Durante a sua execução, o algoritmo mantém um conjunto de vértices cujas distâncias mínimas a partir da origem já são conhecidas. A cada iteração, ele seleciona o vértice com a menor estimativa de custo, explora seus vizinhos e atualiza as distâncias utilizando a seguinte lógica de relaxamento:
+$$ d(v) = \min(d(v), d(u) + w(u, v)) $$
+onde $d(v)$ é o custo atual para chegar ao nó de destino $v$, $d(u)$ é o custo para chegar ao nó atual $u$, e $w(u, v)$ é o peso da aresta que os conecta (combinando a distância e a média estática do RSSI).
+
+\subsection{Implementação do Algoritmo \textit{Q-Learning}}
+
+O \textit{Q-Learning} será implementado como a abordagem de Inteligência Artificial para contornar a natureza dinâmica do sinal Wi-Fi. A estrutura deste algoritmo baseia-se em um Processo de Decisão de Markov (MDP), definido por:
+\begin{itemize}
+    \item \textbf{Estado ($S$):} O nó (vértice) atual em que o agente se encontra;
+    \item \textbf{Ação ($A$):} O movimento para um nó vizinho através de uma aresta;
+    \item \textbf{Recompensa ($R$):} O *feedback* retornado pelo ambiente. Transições por corredores com sinal estável e curto trajeto geram recompensas positivas, enquanto áreas de sombra (RSSI baixo) geram punições severas.
+\end{itemize}
+
+O núcleo da aprendizagem se dá pela atualização iterativa da Tabela Q (matriz de estados e ações) utilizando a Equação de Bellman:
+$$ Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a) - Q(S_t, A_t) \right] $$
+onde:
+\begin{itemize}
+    \item $Q(S_t, A_t)$ é a qualidade atual da ação no estado atual;
+    \item $\alpha$ (Taxa de Aprendizado / \textit{Learning Rate}): determina o quanto a nova informação substitui a antiga ($0 < \alpha \leq 1$);
+    \item $R_{t+1}$ é a recompensa imediata recebida após a ação;
+    \item $\gamma$ (Fator de Desconto / \textit{Discount Factor}): determina a importância de recompensas futuras em relação às imediatas ($0 \leq \gamma \leq 1$);
+    \item $\max_{a} Q(S_{t+1}, a)$ é a estimativa do melhor valor possível no próximo estado.
+\end{itemize}
+
+O agente operará sob uma política \textit{epsilon-greedy} ($\epsilon$-greedy), alternando entre exploração (descobrir novas rotas) e \textit{exploitation} (utilizar a melhor rota conhecida). Após a fase \textit{offline} de treinamento, o algoritmo utilizará os valores consolidados na Tabela Q para inferir as rotas ideais no menor tempo de execução.
 
 % ---------------------------------------------------------------
 \section{Trabalhos relacionados}
