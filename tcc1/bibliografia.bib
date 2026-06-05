@@ -1,9 +1,6 @@
 % ===============================================================
-% BIBLIOGRAFIA - TEMPLATE TCC1 SENAC SANTO AMARO
+% BIBLIOGRAFIA - TCC SENAC SANTO AMARO
 % ===============================================================
-% Este arquivo contém exemplos de referências no padrão ABNT
-% (NBR 6023:2018) para diferentes tipos de fontes.
-%
 % O pacote abntex2cite formata automaticamente as referências.
 % Basta adicionar suas entradas aqui e usar \cite ou
 % \citeonline no texto.
@@ -14,20 +11,99 @@
 % article       -> SOBRENOME, Nome. Titulo do artigo. Periodico, v. X, n. Y, p. XX-YY, Ano.
 % inproceedings -> SOBRENOME, Nome. Titulo. In: EVENTO, Local. Anais. Editora, Ano. p. XX-YY.
 % mastersthesis -> SOBRENOME, Nome. Titulo. Ano. Dissertacao (Mestrado) - Instituicao, Local, Ano.
-% phdthesis     -> SOBRENOME, Nome. Titulo. Ano. Tese (Doutorado) - Instituicao, Local, Ano.
 % misc          -> SOBRENOME, Nome. Titulo. Ano. Disponivel em: URL. Acesso em: data.
 % manual        -> ORGANIZACAO. Titulo. Local, Ano.
 % ===============================================================
 
 
 % ---------------------------------------------------------------
-% EXEMPLOS DE LIVROS
-% Formato ABNT: SOBRENOME, Nome. Titulo: subtitulo. Edicao. Local: Editora, Ano.
+% ARTIGOS EM PERIÓDICOS
+% ---------------------------------------------------------------
+@phdthesis{Watkins1989,
+  author  = {Christopher John Cornish Hellaby Watkins},
+  title   = {Learning from delayed rewards},
+  school  = {King's College, Cambridge},
+  year    = {1989},
+  address = {Cambridge, Inglaterra},
+  type    = {Tese de Doutorado}
+}
+
+@article{Dijkstra1959,
+  author  = {Dijkstra, Edsger Wybe},
+  title   = {A note on two problems in connexion with graphs},
+  journal = {Numerische Mathematik},
+  year    = {1959},
+  volume  = {1},
+  pages   = {269--271}
+}
+
+@article{Stancel2021,
+  author  = {Štancel, Martin and Hurtuk, Ján and Hulič, Michal and Červeňák, Jakub},
+  title   = {Indoor {Atlas} Service as a Tool for Building an Interior Navigation System},
+  journal = {IFAC-PapersOnLine},
+  year    = {2021},
+  volume  = {18},
+  number  = {9}
+}
+
+@article{Chia2025,
+  author  = {Chia, Zi Yang and Goh, Pey Yun and Ong, Lee Yeng and Tan, Shing Chiang},
+  title   = {The Challenge of Dynamic Environments in Regard to {RSSI}-Based Indoor {Wi-Fi} Positioning --- A Systematic Review},
+  journal = {Future Internet},
+  year    = {2025},
+  volume  = {17},
+  number  = {12},
+  pages   = {540},
+  doi     = {10.3390/fi17120540}
+}
+
+@article{Pham2025,
+  author  = {Pham, Hoang Dat and Mysore Narasimhamurthy, Sharath and Mehran, Babak and Manley, Ed and Ashraf, Ahmed},
+  title   = {Reinforcement learning based estimation of shortest paths in dynamically changing transportation networks},
+  journal = {Frontiers in Future Transportation},
+  year    = {2025},
+  volume  = {6},
+  doi     = {10.3389/ffutr.2025.1524232}
+}
+
+
+% ---------------------------------------------------------------
+% ARTIGOS EM ANAIS DE EVENTOS
 % ---------------------------------------------------------------
 
-% Livro com um autor
+@inproceedings{Mendes2016,
+  author    = {Mendes, Natan G. and Oliveira, Fernando L. and Menuzzi, Odair J. and Deus, Cesar A. and Walker, Eliana},
+  title     = {Sistema de posicionamento local {IndoorAtlas} aplicado no {Instituto Federal Farroupilha} {Campus} {São Borja}},
+  booktitle = {Anais do Salão Internacional de Ensino, Pesquisa e Extensão},
+  year      = {2016},
+  address   = {São Borja}
+}
+
+@inproceedings{BoyanLittman1994,
+  author    = {Boyan, Justin A. and Littman, Michael L.},
+  title     = {Packet routing in dynamically changing networks: A reinforcement learning approach},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {1994},
+  volume    = {7},
+  publisher = {MIT Press}
+}
+
+
+% ---------------------------------------------------------------
+% LIVROS
+% ---------------------------------------------------------------
+
+@book{Sutton2018,
+  author    = {Sutton, Richard S. and Barto, Andrew G.},
+  title     = {Reinforcement Learning: An Introduction},
+  publisher = {MIT Press},
+  year      = {2018},
+  edition   = {2},
+  address   = {Cambridge}
+}
+
 @book{Wazlawick2020,
-  author    = {Raul Sidnei Wazlawick},
+  author    = {Wazlawick, Raul Sidnei},
   title     = {Metodologia de Pesquisa para Ciência da Computação},
   publisher = {Elsevier},
   year      = {2020},
@@ -35,9 +111,8 @@
   address   = {Rio de Janeiro}
 }
 
-% Livro com dois autores
 @book{Pressman2016,
-  author    = {Roger S. Pressman and Bruce R. Maxim},
+  author    = {Pressman, Roger S. and Maxim, Bruce R.},
   title     = {Engenharia de Software: uma abordagem profissional},
   publisher = {McGraw-Hill},
   year      = {2016},
@@ -45,9 +120,8 @@
   address   = {Porto Alegre}
 }
 
-% Livro com um autor (outro exemplo)
 @book{Sommerville2019,
-  author    = {Ian Sommerville},
+  author    = {Sommerville, Ian},
   title     = {Engenharia de Software},
   publisher = {Pearson},
   year      = {2019},
@@ -55,9 +129,8 @@
   address   = {São Paulo}
 }
 
-% Livro traduzido
 @book{Gamma2000,
-  author    = {Erich Gamma and Richard Helm and Ralph Johnson and John Vlissides},
+  author    = {Gamma, Erich and Helm, Richard and Johnson, Ralph and Vlissides, John},
   title     = {Padrões de Projeto: soluções reutilizáveis de software orientado a objetos},
   publisher = {Bookman},
   year      = {2000},
@@ -65,9 +138,8 @@
   note      = {Tradução de Luiz A. Meirelles Salgado}
 }
 
-% Livro em inglês
 @book{Cormen2009,
-  author    = {Thomas H. Cormen and Charles E. Leiserson and Ronald L. Rivest and Clifford Stein},
+  author    = {Cormen, Thomas H. and Leiserson, Charles E. and Rivest, Ronald L. and Stein, Clifford},
   title     = {Introduction to Algorithms},
   publisher = {MIT Press},
   year      = {2009},
@@ -77,137 +149,30 @@
 
 
 % ---------------------------------------------------------------
-% EXEMPLOS DE ARTIGOS DE PERIODICOS
-% Formato ABNT: SOBRENOME, Nome. Titulo do artigo. Periodico, Local, v. X, n. Y, p. XX-YY, ano.
+% TRABALHOS DE CONCLUSÃO DE CURSO
 % ---------------------------------------------------------------
 
-% Artigo em periódico nacional
-@article{Silva2022,
-  author  = {João Carlos Silva and Maria Aparecida Santos},
-  title   = {Aplicação de técnicas formais na validação de sistemas distribuídos},
-  journal = {Revista Brasileira de Computação Aplicada},
+@mastersthesis{Claro2022,
+  author  = {Claro, Lucas Barboza Ribeiro},
+  title   = {Comparação de desempenho dos algoritmos {KNN} e {Bayes} Ingênuo para localização interna com fingerprinting},
+  school  = {Centro Universitário Senac},
   year    = {2022},
-  volume  = {14},
-  number  = {2},
-  pages   = {45--58},
-  doi     = {10.5335/rbca.v14i2.12345}
-}
-
-% Artigo em periódico internacional
-@article{LeCun2015,
-  author  = {Yann LeCun and Yoshua Bengio and Geoffrey Hinton},
-  title   = {Deep Learning},
-  journal = {Nature},
-  year    = {2015},
-  volume  = {521},
-  number  = {7553},
-  pages   = {436--444},
-  doi     = {10.1038/nature14539}
-}
-
-% Artigo com DOI
-@article{Kitchenham2004,
-  author  = {Barbara Kitchenham},
-  title   = {Procedures for Performing Systematic Reviews},
-  journal = {Keele University Technical Report},
-  year    = {2004},
-  volume  = {33},
-  pages   = {1--26}
-}
-
-
-% ---------------------------------------------------------------
-% EXEMPLOS DE ARTIGOS EM ANAIS DE EVENTOS
-% Formato ABNT: SOBRENOME, Nome. Titulo. In: EVENTO, Local. Anais. Editora, Ano.
-% ---------------------------------------------------------------
-
-% Artigo em congresso nacional
-@inproceedings{Oliveira2023,
-  author    = {Ana Paula Oliveira and Carlos Eduardo Ferreira},
-  title     = {Uma abordagem baseada em microsserviços para sistemas de e-commerce},
-  booktitle = {Anais do Simpósio Brasileiro de Engenharia de Software},
-  year      = {2023},
-  address   = {Campo Grande},
-  pages     = {112--121},
-  publisher = {SBC},
-  doi       = {10.5753/sbes.2023.00015}
-}
-
-% Artigo em congresso internacional
-@inproceedings{Chen2016,
-  author    = {Tianqi Chen and Carlos Guestrin},
-  title     = {{XGBoost}: A Scalable Tree Boosting System},
-  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
-  year      = {2016},
-  address   = {San Francisco},
-  pages     = {785--794},
-  publisher = {ACM},
-  doi       = {10.1145/2939672.2939785}
-}
-
-
-% ---------------------------------------------------------------
-% EXEMPLOS DE DISSERTACOES E TESES
-% Formato ABNT: SOBRENOME, Nome. Titulo. Ano. Dissertacao/Tese - Instituicao, Local, Ano.
-% ---------------------------------------------------------------
-
-% Dissertação de mestrado
-@mastersthesis{Santos2021,
-  author  = {Pedro Henrique Santos},
-  title   = {Análise de desempenho de algoritmos de aprendizado de máquina aplicados à detecção de fraudes em transações financeiras},
-  school  = {Universidade de São Paulo},
-  year    = {2021},
   address = {São Paulo},
-  type    = {Dissertação (Mestrado em Ciência da Computação)}
+  type    = {Trabalho de Conclusão de Curso (Graduação em Ciência da Computação)}
 }
 
-% Tese de doutorado
-@phdthesis{Ferreira2019,
-  author  = {Juliana Cristina Ferreira},
-  title   = {Modelos de deep learning para processamento de linguagem natural em português brasileiro},
-  school  = {Universidade Estadual de Campinas},
-  year    = {2019},
-  address = {Campinas},
-  type    = {Tese (Doutorado em Ciência da Computação)}
-}
-
-
-% ---------------------------------------------------------------
-% EXEMPLOS DE SITES E RECURSOS ONLINE
-% Formato ABNT: AUTOR ou ORGANIZACAO. Titulo. Ano. Disponivel em: URL. Acesso em: data.
-% ---------------------------------------------------------------
-
-% Site institucional
-@misc{IBGE2024,
-  author = {{IBGE}},
-  title  = {Pesquisa Nacional por Amostra de Domicílios Contínua -- {PNAD} Contínua},
-  year   = {2024},
-  url    = {https://www.ibge.gov.br/estatisticas/sociais/trabalho/9171-pesquisa-nacional-por-amostra-de-domicilios-continua-mensal.html},
-  note   = {Acesso em: 15 jan. 2025}
-}
-
-% Documentação técnica online
-@misc{ReactDocs2025,
-  author = {{Meta}},
-  title  = {React -- A JavaScript library for building user interfaces},
-  year   = {2025},
-  url    = {https://react.dev},
-  note   = {Acesso em: 20 jan. 2025}
-}
-
-% Artigo em blog técnico
-@misc{Fowler2014,
-  author = {Martin Fowler},
-  title  = {Microservices: a definition of this new architectural term},
-  year   = {2014},
-  url    = {https://martinfowler.com/articles/microservices.html},
-  note   = {Acesso em: 10 fev. 2025}
+@mastersthesis{BarrosoBrito2025,
+  author  = {Barroso, Gabriel Rosa Leite and Brito, Pedro Henrique Oliveira},
+  title   = {Protótipo funcional de localização indoor baseado em grafos e algoritmos de busca},
+  school  = {Centro Universitário Senac},
+  year    = {2025},
+  address = {São Paulo},
+  type    = {Trabalho de Conclusão de Curso (Graduação em Ciência da Computação)}
 }
 
 
 % ---------------------------------------------------------------
-% EXEMPLOS DE MANUAIS E DOCUMENTACAO TECNICA
-% Formato ABNT: ORGANIZACAO. Titulo. Local, Ano.
+% NORMAS E MANUAIS
 % ---------------------------------------------------------------
 
 @manual{ABNT2018,
@@ -225,14 +190,34 @@
 }
 
 
+% ---------------------------------------------------------------
+% SITES E RECURSOS ONLINE
+% ---------------------------------------------------------------
+
+@misc{ReactDocs2025,
+  author = {{Meta}},
+  title  = {React -- A JavaScript library for building user interfaces},
+  year   = {2025},
+  url    = {https://react.dev},
+  note   = {Acesso em: 20 jan. 2025}
+}
+
+@misc{Fowler2014,
+  author = {Fowler, Martin},
+  title  = {Microservices: a definition of this new architectural term},
+  year   = {2014},
+  url    = {https://martinfowler.com/articles/microservices.html},
+  note   = {Acesso em: 10 fev. 2025}
+}
+
+
 % ===============================================================
-% DICAS PARA O ALUNO:
-% ===============================================================
+% DICAS:
 % 1. Use chaves consistentes (ex: Sobrenome+Ano: Wazlawick2020)
-% 2. Preencha todos os campos obrigatórios para cada tipo
+% 2. Sempre use o formato Sobrenome, Nome no campo author
 % 3. Para sites, sempre inclua a data de acesso no campo "note"
 % 4. Use {} ao redor de siglas e nomes próprios para preservar
-%    a capitalização (ex: {IBGE}, {XGBoost})
+%    a capitalização (ex: {IBGE}, {IndoorAtlas})
 % 5. Para autores corporativos, use chaves duplas: {{Nome}}
 % 6. Compile com: pdflatex -> bibtex -> pdflatex -> pdflatex
 % ===============================================================
