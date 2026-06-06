@@ -260,7 +260,7 @@ Apesar de sua excelência e completude matemática, o algoritmo de Dijkstra foi 
 
 \subsection{Inteligência Artificial e Aprendizado por Reforço no Roteamento}
 
-Para solucionar a incapacidade dos métodos clássicos em lidar com o "caos" dos ambientes dinâmicos, a pesquisa recorre à Inteligência Artificial (IA), com foco estrito no Aprendizado por Reforço (RL - \textit{Reinforcement Learning}). É imperativo distinguir essa abordagem de outras ramificações da IA, como o Aprendizado Profundo (\textit{Deep Learning}). Enquanto as redes neurais são frequentemente usadas no problema de reconhecimento de posições passivas (\textit{Fingerprinting}), o RL é projetado especificamente para a tomada de decisão sequencial e ativa em ambientes com incertezas.
+Para solucionar a incapacidade dos métodos clássicos em lidar com o "caos" dos ambientes dinâmicos, a pesquisa recorre à Inteligência Artificial (IA), com foco estrito no Aprendizado por Reforço (RL - \textit{Reinforcement Learning}). É imperativo distinguir essa abordagem de outras ramificações da IA, como o Aprendizado Profundo (\textit{Deep Learning}). Enquanto as redes neurais são frequentemente usadas no problema de reconhecimento de posições passivas (\textit{Fingerprinting}), o RL é projetado especificamente para a tomada de decisão sequencial e ativa em ambientes com incertezas \cite{Sutton2018}.
 
 Conforme a literatura recente sobre estimação de rotas, os métodos baseados em RL não necessitam conhecer os custos de ligação de antemão para iniciar a operação em uma rede que muda dinamicamente \cite{Pham2025}. O sistema computacional atua como um agente que mapeia e aprende os caminhos ótimos estritamente por meio de tentativa, erro e interação contínua com o ambiente. Em cenários estocásticos, a aplicação de RL permite que a navegação se adapte em tempo real, mitigando a variabilidade do ambiente sem o alto custo computacional do recálculo estático.
 
@@ -270,10 +270,10 @@ Dentro do paradigma do Aprendizado por Reforço, o modelo matemático central de
 
 Quando o \textit{Q-Learning} é aplicado especificamente para a descoberta de rotas em estruturas de grafos ou redes de transporte, a literatura denomina a técnica como Roteamento Q (\textit{Q-Routing}) \cite{BoyanLittman1994}. O núcleo matemático desse algoritmo reside em uma estrutura matricial conhecida como Tabela Q (\textit{Q-Table}). Nesta matriz, as linhas representam os nós do grafo (corredores) e as colunas representam as transições possíveis. Em cada célula, armazena-se um valor $Q(s, a)$, que reflete a expectativa de custo/recompensa cumulativa daquele trajeto. Neste trabalho, essa Função de Custo integra a atenuação do sinal (RSSI) e a distância física.
 
-O referencial teórico indica que a excelência do Roteamento Q manifesta-se através de suas duas fases de execução \cite{Sutton2018}:
+Conforme detalhado por \citeonline{Pham2025}, o uso do Roteamento Q em redes onde os custos de ligação mudam dinamicamente destaca-se por sua arquitetura de execução dividida em duas etapas. Embora a pesquisa empírica do autor tenha sido validada em redes de transporte estocásticas, a mesma lógica algorítmica aplica-se à instabilidade do sinal Wi-Fi. Assim, a execução do modelo divide-se em duas fases operacionais distintas:
 \begin{itemize}
-    \item \textbf{Fase \textit{Offline} (Treinamento/Exploração):} O agente percorre a rede computacional em múltiplos episódios simulados. Ao sofrer penalidades em caminhos com ruído ou quedas de sinal Wi-Fi, o algoritmo preenche as células da Tabela Q, aprendendo as características flutuantes da rede por meio de recompensas e punições.
-    \item \textbf{Fase \textit{Online} (Execução/Inferência):} Uma vez consolidada a "memória" da Tabela Q, o roteamento real ocorre de forma imediata. Para traçar desvios, o agente necessita apenas consultar o maior valor $Q$ disponível na matriz, operando com uma complexidade de tempo $O(1)$. 
+    \item \textbf{Fase \textit{Offline} (Treinamento/Exploração):} Trata-se da etapa que demanda o tempo computacional necessário para o aprendizado do modelo. O agente percorre a rede em múltiplos episódios simulados, interagindo com o ambiente. Ao sofrer penalidades em caminhos com ruído ou quedas abruptas de sinal Wi-Fi, o algoritmo atualiza a Tabela Q, aprendendo os custos de ligação em mudança estritamente por meio da experiência.
+    \item \textbf{Fase \textit{Online} (Execução/Inferência):} Uma vez consolidado o aprendizado na Tabela Q, o roteamento real dinâmico ocorre de forma imediata. Segundo \citeonline{Pham2025}, o Roteamento Q pode ser executado com uma complexidade de tempo tão igual quanto a do algoritmo de Dijkstra durante esta fase. A grande diferença apontada pelo autor reside na disponibilidade dos dados: enquanto o algoritmo de Dijkstra exige o conhecimento prévio e exato dos pesos das arestas (cenário de informação perfeita) para encontrar a rota, a Inteligência Artificial é capaz de computar o caminho ótimo sem conhecer os custos reais previamente (cenário de informação imperfeita), guiando-se exclusivamente por sua matriz de aprendizado.
 \end{itemize}
 
 \section{Metodologia da pesquisa bibliográfica}
@@ -301,51 +301,380 @@ Esta seção detalha as tecnologias, métricas e algoritmos específicos que ser
 
 \subsection{Modelagem Topológica e Plataforma \textit{IndoorAtlas}}
 
-Para que os algoritmos computacionais possam calcular rotas físicas, o ambiente real do Centro Universitário Senac precisa ser abstraído matematicamente. Para essa digitalização, será utilizada a plataforma \textit{IndoorAtlas}, uma ferramenta especializada em serviços de posicionamento e mapeamento interno. 
+Para que os algoritmos computacionais possam calcular rotas físicas, o ambiente real do
+Centro Universitário Senac precisa ser abstraído matematicamente em uma estrutura navegável.
+Para essa digitalização, será utilizada a plataforma \textit{IndoorAtlas}, uma ferramenta
+especializada em serviços de posicionamento e mapeamento interno que dispensa a instalação
+de qualquer equipamento adicional na infraestrutura do edifício \cite{Stancel2021}.
 
-Através dessa plataforma, a planta baixa da instituição será convertida em um grafo direcionado $G = (V, A)$, onde:
-\begin{itemize}
-    \item $V$ (Vértices): representam os pontos de interesse, salas, corredores e cruzamentos do prédio;
-    \item $A$ (Arestas): representam os caminhos navegáveis que conectam dois vértices adjacentes.
-\end{itemize}
+\subsubsection*{Princípio de Funcionamento: Fusão de Dados Magnéticos e Wi-Fi}
 
-Essa representação estrutural servirá como o "tabuleiro" ou o "ambiente" sobre o qual ambos os algoritmos executarão suas simulações e cálculos.
+O \textit{IndoorAtlas} opera por meio da fusão de duas fontes de dados complementares.
+A primeira é o campo magnético do edifício: conforme detalhado por \citeonline{Stancel2021},
+estruturas modernas construídas com aço e materiais ferromagnéticos possuem impressões
+digitais magnéticas únicas em cada ponto do espaço, geradas pela interação do campo
+magnético da Terra com esses materiais. O sensor magnético do \textit{smartphone} captura
+essas variações e as envia ao serviço, que as compara com um banco de dados de referência
+para estimar a posição do dispositivo.
+
+A segunda fonte de dados é o sinal Wi-Fi. Conforme especificado na documentação oficial
+da plataforma, a \textit{Positioning REST API} do \textit{IndoorAtlas} opera lendo as
+varreduras Wi-Fi do dispositivo, compostas por uma lista dos endereços MAC
+(\textit{BSSIDs}) dos pontos de acesso detectados e os respectivos valores de força de
+sinal, expressos em RSSI (em dBm) \cite{IndoorAtlas2025}. Esses valores são enviados ao
+endpoint \texttt{/locate} da API, que retorna as coordenadas geográficas, o número do andar
+e o raio de incerteza da posição calculada \cite{IndoorAtlas2025}. Na prática, isso
+significa que a cada varredura o sistema registra, para cada corredor, quais redes Wi-Fi
+estão visíveis e com qual intensidade de sinal, construindo o \textit{dataset} empírico de
+RSSI que este trabalho utilizará como variável de custo dinâmico das arestas do grafo.
+
+\subsubsection*{Mapeamento (\textit{Offline})}
+
+O processo de utilização da plataforma divide-se em duas fases. A primeira, denominada
+fase \textit{offline}, é responsável pela construção do banco de dados de referência.
+Conforme descrito por \citeonline{Stancel2021}, a planta baixa do edifício é adicionada
+ao serviço \textit{IndoorAtlas FloorPlans} em formato PNG ou JPEG, com atribuição das
+coordenadas geográficas reais a cada ponto da planta. O pesquisador então percorre
+fisicamente os corredores com um \textit{smartphone}, coletando simultaneamente as leituras
+do campo magnético e as varreduras de RSSI Wi-Fi em cada trecho. Esses dados são enviados
+à API e armazenados no banco de dados de impressões digitais (\textit{fingerprint database}),
+a partir do qual o mapa de referência do edifício é construído \cite{Stancel2021}.
+
+Para garantir a qualidade dos dados, \citeonline{Stancel2021} estabelecem um protocolo
+rigoroso de coleta: o dispositivo deve ser mantido verticalmente a pelo menos 50 cm das
+paredes, o coletor deve caminhar em ritmo constante e em linha reta, e a calibração do
+sensor deve ser realizada regularmente.
+
+Em paralelo, a plataforma converte a planta baixa em um grafo $G = (V, A)$, onde os
+vértices ($V$) representam os cruzamentos e pontos de interesse dos corredores, e as
+arestas ($A$) representam os caminhos navegáveis entre eles. Cada vértice é definido por
+identificador, nome, latitude, longitude e andar; cada aresta é definida pelo nó de origem,
+nó de destino e a distância calculada pela fórmula de Haversine a partir das coordenadas
+geográficas reais \cite{Stancel2021}.
+
+\subsubsection*{Aplicação no Presente Trabalho}
+
+No contexto desta pesquisa, a plataforma \textit{IndoorAtlas} será utilizada
+exclusivamente em sua capacidade de mapeamento e coleta empírica, correspondente
+à fase \textit{offline} descrita anteriormente. Não há, no escopo deste trabalho,
+a necessidade de posicionamento do usuário em tempo real: a origem e o destino de
+cada simulação serão definidos manualmente pelo pesquisador como nós do grafo.
+
+A contribuição da plataforma restringe-se, portanto, a duas entregas fundamentais:
+a topologia navegável do edifício, representada como um grafo de vértices e arestas
+com coordenadas geográficas reais, e o \textit{dataset} empírico de RSSI coletado
+corredor a corredor durante o \textit{site survey}, que constituirá a variável de
+custo dinâmico das arestas nos dois motores de roteamento \cite{IndoorAtlas2025}.
+
 
 \subsection{A Função de Custo: Distância e RSSI}
 
-Em problemas de roteamento, cada aresta possui um custo (ou peso). No algoritmo tradicional, esse custo é puramente a distância física. Na modelagem deste trabalho, a Função de Custo integrará duas variáveis: a distância em metros e a atenuação do sinal Wi-Fi, medida pelo \textit{Received Signal Strength Indicator} (RSSI).
+Em problemas de roteamento, cada aresta de um grafo possui um custo (ou peso) que
+orienta o algoritmo na escolha do melhor caminho. Na abordagem tradicional, esse custo
+é puramente a distância física entre dois pontos. Na modelagem deste trabalho, a Função
+de Custo será composta por duas variáveis complementares: a distância em metros e a
+qualidade do sinal Wi-Fi, medida pelo \textit{Received Signal Strength Indicator} (RSSI).
+A seguir, detalha-se como essa função será aplicada de forma distinta em cada um dos
+dois motores de roteamento.
 
-O RSSI é medido em decibéis por miliwatt (dBm), operando em uma escala logarítmica negativa. Valores próximos a -30 dBm representam um sinal excelente, enquanto valores abaixo de -80 dBm indicam perda iminente de conectividade. Para a implementação computacional, esses valores brutos serão normalizados e transformados em uma métrica de penalidade: quanto pior for a estabilidade do sinal em um determinado corredor (aresta), maior será o "custo" de atravessá-lo, forçando o algoritmo a buscar caminhos alternativos.
+\subsubsection*{Função de Custo para o Algoritmo de Dijkstra}
+
+O algoritmo de Dijkstra opera sobre um grafo com pesos \textbf{estáticos e predefinidos}
+nas arestas. Para compor esses pesos de forma que o roteamento favoreça corredores com
+melhor conectividade Wi-Fi sem ignorar completamente a distância física, este trabalho
+adota uma \textbf{média ponderada} como função de custo de cada aresta.
+
+O primeiro passo da formulação é a transformação do RSSI bruto em uma métrica positiva
+de penalidade. Como o RSSI opera em escala negativa --- valores mais próximos de zero
+indicam sinal melhor, enquanto valores mais negativos indicam sinal degradado
+\cite{Chia2025} --- é necessário invertê-lo em um custo proporcional à degradação do
+sinal. Para isso, aplica-se a normalização \textit{min-max}, técnica amplamente utilizada
+na literatura para converter leituras de RSSI em pesos de arestas em grafos de
+posicionamento \textit{indoor}:
+
+$$ P_{RSSI}(u,v) = \frac{RSSI_{max} - \overline{RSSI}(u,v)}{RSSI_{max} - RSSI_{min}} $$
+
+onde $\overline{RSSI}(u,v)$ é a média aritmética das leituras coletadas no corredor
+entre os nós $u$ e $v$, $RSSI_{max}$ é o pior sinal registrado no \textit{dataset} e
+$RSSI_{min}$ é o melhor sinal registrado. Dessa forma, corredores com sinal excelente
+recebem $P_{RSSI}$ próximo de 0 (baixo custo), enquanto corredores com sinal degradado
+recebem $P_{RSSI}$ próximo de 1 (alto custo).
+
+A distância física da aresta é igualmente normalizada para que ambas as variáveis operem
+na mesma escala $[0, 1]$:
+
+$$ D_{norm}(u,v) = \frac{d(u,v)}{d_{max}} $$
+
+onde $d(u,v)$ é a distância real em metros entre os nós $u$ e $v$, e $d_{max}$ é a
+maior distância de aresta presente no grafo.
+
+Com ambas as variáveis normalizadas, a função de custo final da aresta é definida como
+uma média ponderada, proposta neste trabalho com peso majoritário atribuído à qualidade
+do sinal, dado que o objetivo central da pesquisa é priorizar a conectividade Wi-Fi:
+
+$$ C_{Dijkstra}(u,v) = 0{,}7 \cdot P_{RSSI}(u,v) + 0{,}3 \cdot D_{norm}(u,v) $$
+
+A distribuição de 70\% para o sinal e 30\% para a distância constitui a hipótese
+inicial deste trabalho e será submetida a ajuste empírico durante a fase de calibração,
+caso os resultados preliminares indiquem necessidade de revisão.
+
+\subsubsection*{Função de Custo e Ambiente de Treinamento para o \textit{Q-Learning}}
+
+O \textit{Q-Learning} não opera sobre pesos estáticos. Em vez disso, ele aprende o
+custo de cada aresta por meio da interação repetida com um \textbf{ambiente simulado
+estocástico}, que reproduz as flutuações reais do sinal Wi-Fi observadas nos corredores
+do Senac. A construção desse ambiente é o que diferencia fundamentalmente a abordagem
+da IA do método determinístico.
+
+\textbf{Protocolo de coleta empírica:} Para construir esse ambiente com fidelidade
+estatística, o \textit{dataset} de RSSI será coletado ao longo de \textbf{três semanas},
+em \textbf{três dias por semana}, com medições realizadas em \textbf{dois horários
+distintos} por dia: entre 18h00 e 19h00 (antes do início das aulas, com baixo fluxo
+de pessoas) e entre 20h50 e 21h20 (durante o intervalo, com alto fluxo de pessoas).
+Esse protocolo foi desenhado para capturar a variabilidade estocástica real do sinal
+descrita por \citeonline{Chia2025}, que demonstra que fatores como a circulação de
+pessoas e o ruído eletromagnético causam flutuações sistemáticas e mensuráveis no
+RSSI de corredores internos.
+
+\textbf{Extração das métricas estatísticas:} Ao final do período de coleta, para cada
+aresta $(u,v)$ do grafo, serão extraídas duas métricas do conjunto de leituras de RSSI
+registradas naquele corredor:
+\begin{itemize}
+    \item $\mu(u,v)$: a \textbf{média aritmética} das leituras, representando o nível
+    típico de sinal naquele trecho;
+    \item $\sigma(u,v)$: o \textbf{desvio padrão} das leituras, representando a
+    volatilidade ou instabilidade do sinal naquele trecho.
+\end{itemize}
+
+\textbf{Simulação do ambiente dinâmico:} A cada episódio de treinamento do agente,
+o custo de cada aresta não é fixo, mas sim \textbf{amostrado dinamicamente} a partir
+de uma distribuição normal:
+
+$$ RSSI_{sim}(u,v) \sim \mathcal{N}\left(\mu(u,v),\, \sigma^2(u,v)\right) $$
+
+onde:
+\begin{itemize}
+    \item $RSSI_{sim}(u,v)$ é o valor de sinal \textbf{simulado} para a aresta entre
+    os nós $u$ e $v$ em um determinado episódio de treinamento;
+    \item $\mathcal{N}$ denota a \textbf{distribuição normal} (gaussiana), escolhida
+    por ser o modelo estatístico que melhor representa as flutuações do sinal RSSI em
+    Ambientes Dinâmicos, nos quais variações são simétricas em torno de um valor médio
+    \cite{Chia2025};
+    \item $\mu(u,v)$ é a \textbf{média aritmética} das leituras de RSSI coletadas
+    empiricamente naquele corredor durante o protocolo de coleta, representando o
+    nível típico de sinal naquele trecho;
+    \item $\sigma^2(u,v)$ é a \textbf{variância} das leituras coletadas naquele
+    corredor, representando a volatilidade ou instabilidade do sinal. Corredores com
+    alto fluxo de pessoas tendem a apresentar maior variância, simulando com fidelidade
+    as condições reais de degradação descritas por \citeonline{Chia2025}.
+\end{itemize}
+
+Dessa forma, a cada novo episódio, o agente enfrenta uma realização diferente do
+ambiente, aprendendo a tomar decisões robustas não para um único valor fixo de sinal,
+mas para toda a distribuição de condições possíveis observadas empiricamente naquele
+corredor.
+Essa abordagem é mais fiel à realidade do que sortear valores uniformemente em um
+intervalo $[min, max]$, pois o RSSI real tende a se concentrar em torno de um valor
+médio com variações simétricas, comportamento característico de uma distribuição
+normal em ambientes dinâmicos \cite{Chia2025}. Dessa forma, o agente é exposto a
+condições que refletem tanto os momentos de boa conectividade quanto os episódios
+de degradação severa do sinal observados empiricamente.
+
+\textbf{Função de recompensa:} A partir do $RSSI_{sim}$ amostrado, a função de
+recompensa $R$ do agente é definida como:
+
+$$
+R(u,v) =
+\begin{cases}
+    +10 & \text{se } RSSI_{sim}(u,v) \geq -60 \text{ dBm (sinal aceitável)} \\
+    -10 & \text{se } RSSI_{sim}(u,v) < -60 \text{ dBm (zona de sombra)} \\
+    +50 & \text{se o agente alcança o nó de destino}
+\end{cases}
+$$
+
+Essa estrutura de recompensa força o agente a aprender, ao longo dos episódios de
+treinamento, quais corredores apresentam sinal estável e quais representam zonas de
+risco, consolidando esse conhecimento na Tabela Q.
 
 \subsection{Implementação do Algoritmo de Dijkstra}
 
-O algoritmo de Dijkstra será implementado como a abordagem de base (\textit{baseline}) deste estudo. Trata-se de um algoritmo de busca não informada que garante a descoberta do caminho de menor custo entre um nó de origem e todos os outros nós de um grafo, desde que os pesos das arestas sejam não negativos.
+O algoritmo de Dijkstra será implementado como a abordagem de base
+(\textit{baseline}) deste estudo. Trata-se de um algoritmo de busca não informada
+que garante a descoberta do caminho de menor custo entre um nó de origem e todos
+os outros nós de um grafo, desde que os pesos das arestas sejam não negativos
+\cite{Dijkstra1959}.
 
-Durante a sua execução, o algoritmo mantém um conjunto de vértices cujas distâncias mínimas a partir da origem já são conhecidas. A cada iteração, ele seleciona o vértice com a menor estimativa de custo, explora seus vizinhos e atualiza as distâncias utilizando a seguinte lógica de relaxamento:
-$$ d(v) = \min(d(v), d(u) + w(u, v)) $$
-onde $d(v)$ é o custo atual para chegar ao nó de destino $v$, $d(u)$ é o custo para chegar ao nó atual $u$, e $w(u, v)$ é o peso da aresta que os conecta (combinando a distância e a média estática do RSSI).
+\subsubsection*{Entrada: o Grafo Ponderado}
+
+O algoritmo receberá como entrada o grafo $G = (V, A)$ construído a partir do
+mapeamento topológico do Centro Universitário Senac via \textit{IndoorAtlas},
+conforme descrito na Seção 2.3.1. Cada aresta $(u, v) \in A$ terá como peso o
+valor $C_{Dijkstra}(u,v)$, calculado pela função de custo ponderada definida na
+Seção 2.3.2:
+
+$$ C_{Dijkstra}(u,v) = 0{,}7 \cdot P_{RSSI}(u,v) + 0{,}3 \cdot D_{norm}(u,v) $$
+
+Esses pesos são \textbf{estáticos}: calculados uma única vez a partir das médias
+do \textit{dataset} empírico de RSSI e fixados antes da execução do algoritmo.
+Essa característica é o que classifica o Dijkstra como uma abordagem determinística
+--- ele encontra a rota ótima para um conjunto fixo de custos, mas é incapaz de
+reagir a variações desses custos em tempo real \cite{Pham2025}.
+
+\subsubsection*{Execução: o Mecanismo de Relaxamento}
+
+Durante sua execução, o algoritmo mantém duas estruturas de dados principais
+\cite{Cormen2009}:
+
+\begin{itemize}
+    \item Um conjunto $S$ de vértices cujas distâncias mínimas a partir do nó de
+    origem já foram definitivamente calculadas;
+    \item Uma fila de prioridade $Q$ contendo os vértices ainda não processados,
+    ordenados pela menor estimativa de custo acumulado.
+\end{itemize}
+
+A cada iteração, o algoritmo extrai de $Q$ o vértice $u$ com menor custo
+acumulado, adiciona-o a $S$ e aplica a operação de \textbf{relaxamento} sobre
+todas as arestas que partem de $u$. O relaxamento verifica se o caminho até um
+vértice vizinho $v$ passando por $u$ é mais barato do que o caminho anteriormente
+conhecido para $v$:
+
+$$ d(v) = \min\left(d(v),\ d(u) + C_{Dijkstra}(u,v)\right) $$
+
+onde $d(v)$ é o custo acumulado atual para alcançar o nó $v$ e $d(u)$ é o custo
+acumulado para alcançar o nó atual $u$ \cite{Cormen2009}. O algoritmo repete esse
+processo até que todos os vértices tenham sido processados ou até que o nó de
+destino seja alcançado.
+
+\subsubsection*{Saída e Complexidade}
+
+A saída do algoritmo será o \textbf{caminho de menor custo ponderado} entre o nó
+de origem e o nó de destino definidos pelo pesquisador, representando a rota que
+melhor equilibra conectividade Wi-Fi e distância física segundo os pesos definidos.
+A complexidade de tempo do algoritmo com fila de prioridade é $O((V + A) \log V)$,
+onde $V$ é o número de vértices e $A$ é o número de arestas do grafo
+\cite{Cormen2009}.
 
 \subsection{Implementação do Algoritmo \textit{Q-Learning}}
 
-O \textit{Q-Learning} será implementado como a abordagem de Inteligência Artificial para contornar a natureza dinâmica do sinal Wi-Fi. A estrutura deste algoritmo baseia-se em um Processo de Decisão de Markov (MDP), definido por:
+O \textit{Q-Learning} será implementado como a abordagem de Inteligência Artificial
+deste estudo. Diferentemente do Dijkstra, que opera sobre pesos estáticos e
+predefinidos, o \textit{Q-Learning} aprende a política de roteamento ótima por meio
+da interação iterativa com o ambiente simulado estocástico descrito na Seção 2.3.2,
+sem necessitar conhecer previamente os custos reais das arestas \cite{Sutton2018}.
+
+\subsubsection*{Modelagem como Processo de Decisão de Markov}
+
+A estrutura do algoritmo baseia-se em um \textbf{Processo de Decisão de Markov}
+(MDP --- \textit{Markov Decision Process}), formalismo matemático que modela
+problemas de tomada de decisão sequencial em ambientes com incerteza
+\cite{Sutton2018}. No contexto deste trabalho, o MDP é definido pela seguinte
+tripla:
+
 \begin{itemize}
-    \item \textbf{Estado ($S$):} O nó (vértice) atual em que o agente se encontra;
-    \item \textbf{Ação ($A$):} O movimento para um nó vizinho através de uma aresta;
-     \item \textbf{Recompensa ($R$):} O \textit{feedback} retornado pelo ambiente. Transições por corredores com sinal estável e curto trajeto geram recompensas positivas, enquanto áreas de sombra (RSSI baixo) geram punições severas.
+    \item \textbf{Estado} ($S$): o nó (vértice) atual em que o agente se encontra
+    no grafo $G = (V, A)$. O espaço de estados é finito e corresponde ao conjunto
+    completo de vértices do grafo, ou seja, todos os corredores e cruzamentos
+    mapeados do Centro Universitário Senac;
+
+    \item \textbf{Ação} ($A$): o movimento do agente para um nó vizinho através de
+    uma aresta disponível. O conjunto de ações possíveis em cada estado é limitado
+    pelos vizinhos diretos do vértice atual no grafo, garantindo que o agente só
+    possa se mover por caminhos fisicamente existentes;
+
+    \item \textbf{Recompensa} ($R$): o \textit{feedback} numérico retornado pelo
+    ambiente após cada ação, conforme a função de recompensa definida na Seção
+    2.3.2. Transições por corredores com sinal estável geram recompensas positivas,
+    incentivando o agente a preferir esses trajetos; travessias por zonas de sombra
+    (RSSI abaixo do limiar de $-60$ dBm) geram punições severas, ensinando o agente
+    a evitá-las; e a chegada ao nó de destino gera uma recompensa máxima, orientando
+    o agente em direção ao objetivo \cite{Sutton2018}.
 \end{itemize}
 
-O núcleo da aprendizagem se dá pela atualização iterativa da Tabela Q (matriz de estados e ações) utilizando a Equação de Bellman:
-$$ Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a) - Q(S_t, A_t) \right] $$
-onde:
+\subsubsection*{A Tabela Q e a Equação de Bellman}
+
+O núcleo do aprendizado reside em uma estrutura matricial denominada \textbf{Tabela
+Q} (\textit{Q-Table}), onde cada célula $Q(s, a)$ armazena a estimativa acumulada
+de recompensa futura associada a tomar a ação $a$ a partir do estado $s$
+\cite{BoyanLittman1994}. No início do treinamento, todos os valores da Tabela Q são
+inicializados em zero, representando o estado de ignorância total do agente sobre
+o ambiente.
+
+A cada passo de interação com o ambiente, o agente atualiza a célula correspondente
+da Tabela Q utilizando a \textbf{Equação de Bellman} \cite{Sutton2018}:
+
+$$ Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ R_{t+1} + \gamma
+\max_{a} Q(S_{t+1}, a) - Q(S_t, A_t) \right] $$
+
+onde cada termo possui o seguinte significado:
+
 \begin{itemize}
-    \item $Q(S_t, A_t)$ é a qualidade atual da ação no estado atual;
-    \item $\alpha$ (Taxa de Aprendizado / \textit{Learning Rate}): determina o quanto a nova informação substitui a antiga ($0 < \alpha \leq 1$);
-    \item $R_{t+1}$ é a recompensa imediata recebida após a ação;
-    \item $\gamma$ (Fator de Desconto / \textit{Discount Factor}): determina a importância de recompensas futuras em relação às imediatas ($0 \leq \gamma \leq 1$);
-    \item $\max_{a} Q(S_{t+1}, a)$ é a estimativa do melhor valor possível no próximo estado.
+    \item $Q(S_t, A_t)$ é o valor atual registrado na Tabela Q para a ação $A_t$
+    tomada no estado $S_t$, representando a estimativa de qualidade dessa decisão
+    antes da atualização;
+
+    \item $\alpha$ (\textit{Learning Rate} --- Taxa de Aprendizado, $0 < \alpha
+    \leq 1$): controla o quanto a nova experiência substitui o conhecimento
+    anterior. Valores altos tornam o agente mais reativo a novas informações, mas
+    menos estável; valores baixos tornam o aprendizado mais conservador e gradual
+    \cite{Sutton2018};
+
+    \item $R_{t+1}$ é a recompensa imediata recebida pelo agente após executar a
+    ação $A_t$ no estado $S_t$, calculada pela função de recompensa definida na
+    Seção 2.3.2;
+
+    \item $\gamma$ (\textit{Discount Factor} --- Fator de Desconto, $0 \leq \gamma
+    \leq 1$): determina o quanto o agente valoriza recompensas futuras em relação
+    às imediatas. Um valor de $\gamma$ próximo de 1 torna o agente preocupado com
+    o longo prazo da rota; um valor próximo de 0 torna-o míope, priorizando apenas
+    a recompensa imediata \cite{Sutton2018};
+
+    \item $\max_{a} Q(S_{t+1}, a)$ é a melhor estimativa de recompensa futura
+    disponível na Tabela Q a partir do próximo estado $S_{t+1}$, representando o
+    valor da decisão ótima que o agente acredita poder tomar a seguir;
+
+    \item O termo $\left[ R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a) - Q(S_t, A_t)
+    \right]$ é denominado \textbf{erro de diferença temporal} (\textit{TD error}):
+    mede a discrepância entre o que o agente esperava obter e o que efetivamente
+    obteve, sendo esse erro o sinal que conduz o aprendizado \cite{Sutton2018}.
 \end{itemize}
 
-O agente operará sob uma política \textit{epsilon-greedy} ($\epsilon$-greedy), alternando entre exploração (descobrir novas rotas) e \textit{exploitation} (utilizar a melhor rota conhecida). Após a fase \textit{offline} de treinamento, o algoritmo utilizará os valores consolidados na Tabela Q para inferir as rotas ideais no menor tempo de execução.
+\subsubsection*{Política de Exploração: \textit{Epsilon-Greedy}}
+
+Durante o treinamento, o agente precisa equilibrar duas necessidades conflitantes:
+\textbf{explorar} novos caminhos desconhecidos (que podem ser melhores do que os
+já conhecidos) e \textbf{exploitar} o conhecimento já acumulado na Tabela Q
+(escolhendo sempre a melhor ação conhecida). Para isso, será adotada a política
+\textit{epsilon-greedy} ($\varepsilon$-greedy) \cite{Sutton2018}: com probabilidade
+$\varepsilon$ o agente escolhe uma ação aleatória (exploração), e com probabilidade
+$1 - \varepsilon$ escolhe a ação de maior valor $Q$ conhecido (explotação). O valor
+de $\varepsilon$ será reduzido gradualmente ao longo dos episódios de treinamento,
+de forma que o agente explore amplamente no início e passe a exploitar o conhecimento
+consolidado ao final.
+
+\subsubsection*{Fases de Execução e Papel no Comparativo}
+
+Assim como descrito na Seção 2.1.4, a execução do modelo divide-se em duas fases
+\cite{Pham2025}:
+
+\begin{itemize}
+    \item \textbf{Fase \textit{Offline} (Treinamento):} o agente percorre o grafo
+    em múltiplos episódios simulados, recebendo valores de RSSI amostrados
+    dinamicamente de $\mathcal{N}(\mu(u,v), \sigma^2(u,v))$ a cada passo. Ao longo
+    dos episódios, a Tabela Q converge para uma representação estável das qualidades
+    de cada corredor, incorporando a variabilidade estocástica do sinal observada
+    empiricamente;
+
+    \item \textbf{Fase \textit{Online} (Inferência):} com a Tabela Q consolidada,
+    o roteamento ocorre de forma imediata por simples consulta à matriz: o agente
+    seleciona, em cada nó, a ação de maior valor $Q$ disponível. Conforme demonstrado
+    por \citeonline{Pham2025}, apesar do tempo computacional envolvido durante a fase
+    de treinamento \textit{offline}, o roteamento Q pode ser executado com uma
+    complexidade de tempo de execução equivalente à do algoritmo de Dijkstra durante
+    a fase \textit{online}. Essa característica é relevante no contexto deste estudo:
+    enquanto o Dijkstra exigiria recálculo completo a cada variação de sinal Wi-Fi,
+    a IA infere a rota a partir do aprendizado acumulado, sem necessitar conhecer os
+    custos reais das arestas em tempo real \cite{Pham2025}.
+\end{itemize}
 
 % ---------------------------------------------------------------
 \section{Trabalhos relacionados}
@@ -359,7 +688,7 @@ Nesta seção, detalham-se três trabalhos que compartilham o foco direto na res
 
 \subsection{Trabalho 2: Reinforcement learning based estimation of shortest paths in dynamically changing transportation networks}
 
-\citeonline{Pham2025} investigaram as limitações dos algoritmos tradicionais de roteamento (como Dijkstra e A*) frente a ambientes dinâmicos e estocásticos, nos quais os custos de locomoção flutuam constantemente devido a eventos imprevistos do mundo real. A abordagem consistiu na implementação do \textit{Q-Learning} para capacitar o sistema a descobrir rotas ótimas de forma autônoma através de interações contínuas e acúmulo de experiência. Os resultados demonstraram que a Inteligência Artificial estima as melhores rotas com a mesma exatidão matemática do Dijkstra sob condições de incerteza, além de reduzir drasticamente a complexidade de tempo na fase de execução (\textit{online}) para $O(1)$, viabilizando tomadas de decisão instantâneas. A limitação deste estudo, contudo, reside em seu escopo de aplicação: o foco recaiu estritamente sobre a navegação \textit{outdoor} em larga escala (tráfego veicular), utilizando o congestionamento de trânsito como o peso dinâmico. O presente trabalho diferencia-se por transpor a eficiência matemática do \textit{Q-Learning} para o micromapeamento \textit{indoor}, substituindo o tráfego de veículos pela flutuação estocástica do sinal Wi-Fi como a variável de penalidade da rede.
+\citeonline{Pham2025} investigaram as limitações dos algoritmos tradicionais de roteamento (como Dijkstra e A*) frente a ambientes dinâmicos e estocásticos, nos quais os custos de locomoção flutuam constantemente devido a eventos imprevistos do mundo real. A abordagem consistiu na implementação do \textit{Q-Learning} para capacitar o sistema a descobrir rotas ótimas de forma autônoma através de interações contínuas e acúmulo de experiência. Os resultados demonstraram que a Inteligência Artificial estima as melhores rotas com a mesma exatidão matemática do Dijkstra sob condições de incerteza. (\textit{online}) para $O(1)$, viabilizando tomadas de decisão instantâneas. A limitação deste estudo, contudo, reside em seu escopo de aplicação: o foco recaiu estritamente sobre a navegação \textit{outdoor} em larga escala (tráfego veicular), utilizando o congestionamento de trânsito como o peso dinâmico. O presente trabalho diferencia-se por transpor a eficiência matemática do \textit{Q-Learning} para o micromapeamento \textit{indoor}, substituindo o tráfego de veículos pela flutuação estocástica do sinal Wi-Fi como a variável de penalidade da rede.
 
 \subsection{Trabalho 3: The Challenge of Dynamic Environments in Regard to RSSI-Based Indoor Wi-Fi Positioning}
 
@@ -409,14 +738,46 @@ A solução compreende a estruturação de um ambiente computacional de simulaç
 A seguir, detalham-se os pilares que compõem a abordagem:
 
 \begin{itemize}
-    \item \textbf{Visão geral da solução}: A entrega consistirá em uma suíte de simulação estruturada em \textit{scripts} modulares. Este ambiente integrará um banco de dados empírico de sinais de rede (\textit{fingerprinting}) à teoria matemática dos grafos, permitindo a execução de testes de estresse em algoritmos de busca e a extração de métricas precisas de desempenho.
+\item \textbf{Visão geral da solução}: A entrega deste trabalho consiste em um
+    ambiente computacional de simulação construído para executar e comparar dois
+    algoritmos de roteamento sob condições reais de variação de sinal Wi-Fi. O
+    ambiente consumirá dados topológicos e de radiofrequência coletados empiricamente
+    nos corredores do Centro Universitário Senac, modelará essa estrutura física como
+    um grafo ponderado e submeterá os dois motores de roteamento a cenários
+    controlados de teste, extraindo métricas comparativas de desempenho.
 
-    \item \textbf{Arquitetura}: O pipeline da simulação organiza-se em quatro módulos de processamento complementares e interdependentes:
+    \item \textbf{Arquitetura}: O ambiente de simulação é composto por quatro módulos
+    interdependentes, executados sequencialmente:
     \begin{enumerate}
-        \item \textit{Módulo de Coleta e Mapeamento}: Integração com a plataforma \textit{IndoorAtlas} para a extração da topologia predial e a construção do \textit{dataset} empírico contendo os registros físicos do RSSI.
-        \item \textit{Módulo de Estruturação Lógica}: Processamento \textit{offline} dos dados brutos, tratamento de anomalias estatísticas e construção matemática do grafo ponderado (vértices e arestas).
-        \item \textit{Motor Determinístico (Baseline)}: Implementação e execução do Algoritmo de Dijkstra. Este \textit{script} consumirá o grafo utilizando a média aritmética do RSSI e a distância física como pesos fixos (\textit{hardcoded}) nas arestas.
-        \item \textit{Motor Estocástico (Inteligência Artificial)}: Implementação e execução do \textit{Q-Learning}. Este \textit{script} simulará um Ambiente Dinâmico (DE), onde os valores de RSSI flutuam iterativamente com base nas distribuições de probabilidade reais coletadas, forçando o agente a treinar e aprender através de punições matemáticas em áreas de sombra de rede.
+        \item \textbf{Módulo de Coleta e Mapeamento}: Utilizando a plataforma
+        \textit{IndoorAtlas}, serão realizadas coletas presenciais nos corredores do
+        Senac ao longo de três semanas, conforme o protocolo definido na Seção 2.3.2.
+        Esse módulo produz duas saídas: a topologia do edifício convertida em grafo
+        $G = (V, A)$ com coordenadas geográficas reais, e o \textit{dataset} empírico
+        de RSSI por corredor, contendo as leituras brutas coletadas nos dois horários
+        de coleta.
+
+        \item \textbf{Módulo de Estruturação Lógica}: Os dados brutos de RSSI passam
+        por tratamento estatístico: remoção de leituras discrepantes, cálculo da média
+        $\mu(u,v)$ e do desvio padrão $\sigma(u,v)$ por aresta, e aplicação da
+        normalização \textit{min-max} para conversão em penalidade $P_{RSSI}(u,v)$.
+        Ao final desse módulo, cada aresta do grafo possui seu peso
+        $C_{Dijkstra}(u,v)$ calculado e pronto para consumo pelos motores de
+        roteamento.
+
+        \item \textbf{Motor Determinístico --- Dijkstra}: Recebe o grafo com pesos
+        estáticos e executa o algoritmo de Dijkstra conforme descrito na Seção 2.3.3,
+        calculando a rota de menor custo ponderado entre a origem e o destino
+        definidos. Opera com os valores fixos de $\mu(u,v)$ nas arestas, sem
+        capacidade de reagir a variações do sinal durante a execução.
+
+        \item \textbf{Motor Estocástico --- \textit{Q-Learning}}: Recebe o grafo e
+        os parâmetros estatísticos $\mu(u,v)$ e $\sigma(u,v)$ de cada aresta.
+        Durante a fase de treinamento, simula um Ambiente Dinâmico amostrando os
+        valores de RSSI a partir de $\mathcal{N}(\mu(u,v), \sigma^2(u,v))$ a cada
+        episódio, conforme descrito na Seção 2.3.2. Após a convergência da Tabela Q,
+        executa a fase de inferência para os mesmos pares origem-destino utilizados
+        pelo Dijkstra.
     \end{enumerate}
 
     \item \textbf{Tecnologias e ferramentas}: 
