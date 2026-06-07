@@ -35,6 +35,9 @@
 \usepackage{pgfgantt}               % Diagramas de Gantt
 \usepackage[brazilian,hyperpageref]{backref}  % Páginas com citações
 \usepackage[alf]{abntex2cite}       % Citações ABNT
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit}
+
 
 % ---------------------------------------------------------------
 % CONFIGURAÇÕES DO PDF
@@ -70,7 +73,7 @@ Edinaldo Matias dos Santos Junior \\
 André Luis Ferreira de Oliveira}
 \local{São Paulo}
 \data{2026}
-\orientador{Prof. Thyago Quintas}
+\orientador{Prof. Thyago Conchado Quintas}
 % \coorientador{Prof. Nome do Coorientador} % Descomente se houver coorientador
 
 \instituicao{%
@@ -134,16 +137,16 @@ Este documento apresenta a proposta inicial do Trabalho de Conclusão de Curso (
 % ---------------------------------------------------------------
 % LISTA DE ILUSTRAÇÕES
 % ---------------------------------------------------------------
-% \pdfbookmark[0]{\listfigurename}{lof}
-% \listoffigures*
-% \cleardoublepage
+\pdfbookmark[0]{\listfigurename}{lof}
+\listoffigures*
+\cleardoublepage
 
 % ---------------------------------------------------------------
 % LISTA DE TABELAS
 % ---------------------------------------------------------------
-% \pdfbookmark[0]{\listtablename}{lot}
-% \listoftables*
-% \cleardoublepage
+\pdfbookmark[0]{\listtablename}{lot}
+\listoftables*
+\cleardoublepage
 
 % ---------------------------------------------------------------
 % SUMÁRIO
@@ -167,7 +170,11 @@ O sistema de posicionamento e navegação em ambientes externos (\textit{outdoor
 
 Para solucionar a navegação nesses espaços fechados, \citeonline{Stancel2021} afirmam que o mundo real pode ser mapeado computacionalmente através de um grafo de vértices e arestas. A viabilidade dessa modelagem estrutural especificamente para os corredores do Senac já foi comprovada empiricamente por \citeonline{BarrosoBrito2025}. A partir dessa modelagem, algoritmos clássicos de teoria dos grafos, como Dijkstra e A*, são muito bem-sucedidos ao definir a menor rota para redes com custos de arestas estáticos. Entretanto, no contexto prático real, os custos das arestas mudam dinamicamente.
 
-Sendo assim, essas abordagens tradicionais apresentam várias limitações em cenários onde o usuário terá sua rota determinada a fim de evitar congestionamentos ou manter uma conectividade Wi-Fi \cite{Pham2025}.
+Sendo assim, essas abordagens tradicionais apresentam várias limitações 
+em cenários onde os custos de ligação mudam dinamicamente --- como 
+a evitar congestionamentos em redes de transporte \cite{Pham2025} 
+ou, no contexto deste trabalho, a manutenção de uma conectividade Wi-Fi 
+estável em ambientes indoor.
 
 Para \citeonline{Pham2025}, algoritmos baseados em aprendizado por reforço computam ótimos resultados quando tratamos de redes que mudam dinamicamente. Dessa forma, este estudo propõe realizar um comparativo prático no Centro Universitário Senac entre o algoritmo determinístico de Dijkstra e um modelo de Inteligência Artificial (IA) baseado em Aprendizado por Reforço (RL), utilizando como pesos das arestas a distância física (metros) e a qualidade do sinal baseada no Received Signal Strength Indicator (RSSI).
 
@@ -216,7 +223,11 @@ Os objetivos secundários representam os desdobramentos metodológicos e prátic
 
 \begin{enumerate}
     \item Realizar o mapeamento topológico da planta baixa do Centro Universitário Senac, convertendo os corredores e cruzamentos da instituição em uma rede de grafos navegável;
-    \item Coletar e compilar um banco de dados empírico contendo as aferições reais da potência do sinal Wi-Fi (RSSI) no ambiente estudado, mapeando as flutuações em diferentes períodos de fluxo e ocupação;
+    \item Coletar e compilar um banco de dados empírico contendo as aferições reais da potência do sinal Wi-Fi (RSSI) no ambiente estudado. O \textit{dataset} de RSSI será coletado ao longo de \textbf{três semanas},
+em \textbf{três dias por semana}, com medições realizadas em \textbf{dois horários
+distintos} por dia: entre 18h00 e 19h00 (antes do início das aulas, com baixo fluxo
+de pessoas) e entre 20h50 e 21h20 (durante o intervalo, com alto fluxo de pessoas)
+
     \item Implementar o algoritmo clássico de Dijkstra para o roteamento na rede, adotando a métrica de distância física combinada com a média estática do RSSI como peso fixo das arestas;
     \item Implementar o algoritmo de \textit{Q-Learning}, realizando a modelagem matemática do ambiente (estados, ações e função de custo/recompensa) para que o agente autônomo aprenda interativamente a contornar rotas de baixa conectividade;
     \item Avaliar e comparar o desempenho de ambas as abordagens computacionais em cenários estáticos (ordem) e dinâmicos (caos), com base nos critérios de completude, grau de otimização, complexidade de tempo e complexidade de espaço.
@@ -231,32 +242,131 @@ Este capítulo apresenta a fundamentação teórica que sustenta o desenvolvimen
 % ---------------------------------------------------------------
 \section{Referencial teórico}
 \label{sec:referencial}
-\subsection{Navegação \textit{Indoor}, Wi-Fi e a Métrica RSSI}
-A complexidade de localizar e guiar usuários em ambientes fechados difere drasticamente da navegação \textit{outdoor}. Enquanto espaços abertos dependem do Sistema de Posicionamento Global (GPS), a infraestrutura \textit{indoor} exige tecnologias locais devido à severa atenuação que os sinais de satélite sofrem ao atravessar barreiras arquitetônicas. Para contornar esse desafio tecnológico, \citeonline{Stancel2021} afirmam que o sinal Wi-Fi desponta como a tecnologia viável mais proeminente, permitindo o posicionamento em aeroportos, garagens e campus universitários sem a necessidade de infraestrutura de hardware adicional no dispositivo do usuário.
 
-A principal métrica extraída dessa rede é o \textit{Received Signal Strength Indicator} (RSSI), que quantifica a força do sinal recebido por um dispositivo móvel. O valor do RSSI é expresso em decibéis por miliwatt (dBm) e é comumente lido em espectros negativos, onde valores mais próximos de zero indicam maior qualidade de conexão. 
+\subsection{Navegação \textit{Indoor}, Wi-Fi e a Métrica RSSI}
+
+A complexidade de localizar e guiar usuários em ambientes fechados difere
+drasticamente da navegação \textit{outdoor}. Enquanto espaços abertos dependem
+do Sistema de Posicionamento Global (GPS), a infraestrutura \textit{indoor}
+exige tecnologias locais devido à severa atenuação que os sinais de satélite
+sofrem ao atravessar barreiras arquitetônicas. Para contornar esse desafio
+tecnológico, \citeonline{Stancel2021} demonstram que o posicionamento indoor pode ser viabilizado
+ sem infraestrutura adicional de hardware, 
+utilizando sensores já presentes nos smartphones, permitindo o posicionamento em aeroportos,
+garagens e campus universitários sem a necessidade de infraestrutura de hardware
+adicional no dispositivo do usuário.
+
+A principal métrica extraída dessa rede é o \textit{Received Signal Strength
+Indicator} (RSSI), que quantifica a força do sinal recebido por um dispositivo
+móvel. O valor do RSSI é expresso em decibéis por miliwatt (dBm) e é comumente
+lido em espectros negativos, onde valores mais próximos de zero indicam maior
+qualidade de conexão.
 
 \begin{figure}[H]
     \centering
-    \caption{Figura 1 - Expressão dos decibéis por miliwatt}
-    
-    % 2. A imagem em si
-    \includegraphics[width=0.5\textwidth]{img/RSSI.png}    
-    % 3. A fonte fica embaixo da imagem (use \fonte)
-    \fonte{Elaborado pelo autor, com base em \citeonline{Chia2025}}
-    
-    % 4. O apelido para você referenciar no texto
+    \caption{Expressão dos decibéis por miliwatt}
+    \includegraphics[width=0.5\textwidth]{img/RSSI.png}
+    \legend{Fonte: Elaborado pelo autor, com base em \citeonline{Chia2025}}
     \label{fig:dinamica_rssi}
 \end{figure}
 
-Contudo, a literatura aponta que a estabilidade dessa métrica é altamente vulnerável. Segundo \citeonline{Chia2025}, espaços internos fechados e com alto fluxo de usuários são classificados como Ambientes Dinâmicos (DE - \textit{Dynamic Environments}). Nesses cenários, fatores físicos --- como o bloqueio do sinal pela circulação de massas humanas --- e de rede --- como colisões de pacotes e interferência de múltiplos caminhos (\textit{multipath interference}) --- geram flutuações constantes e quedas abruptas no nível do RSSI.
+Contudo, a literatura aponta que a estabilidade dessa métrica é altamente
+vulnerável. Segundo \citeonline{Chia2025}, espaços internos fechados e com alto
+fluxo de usuários são classificados como Ambientes Dinâmicos (DE ---
+\textit{Dynamic Environments}). Nesses cenários, fatores físicos --- como o
+bloqueio do sinal pela circulação de massas humanas --- e de rede --- como
+interferência de múltiplos caminhos (\textit{multipath
+interference}) --- geram flutuações constantes e quedas abruptas no nível do
+RSSI.
+
+\begin{figure}[H]
+    \centering
+    \caption{Fatores Dinâmicos}
+    \includegraphics[width=0.5\textwidth]{img/fatores_dinamicos.png}
+    \legend{Fonte: Traduzido pelo autor, com base em \citeonline{Chia2025}}
+    \label{fig:fatores_dinamicos}
+\end{figure}
+
 \subsection{Teoria dos Grafos e o Algoritmo de Dijkstra}
 
-Para que a navegação seja computacionalmente viável, o ambiente físico deve ser abstraído em uma estrutura matemática de grafos. Conforme detalhado por \citeonline{BarrosoBrito2025}, os grafos constituem estruturas matemáticas altamente versáteis cuja função principal é modelar sistemas compostos por entidades e pelas relações entre elas. Em termos formais, um grafo é formado por um conjunto de pontos, denominados vértices (ou nós), e pelas ligações que os conectam, chamadas de arestas (quando não possuem orientação) ou arcos (quando possuem direção). Na modelagem de roteamento espacial, utilizam-se comumente grafos simples e não direcionados, garantindo que a conexão entre dois vértices seja bidirecional — permitindo o deslocamento de ida e volta — e que não existam laços conectando um vértice a ele mesmo \cite{BarrosoBrito2025}. A partir da noção de vizinhança, que ocorre quando existe uma aresta direta entre dois nós, algoritmos computacionais conseguem definir sequências de passos conhecidas como caminhos. Dessa forma, corredores e salas são representados como vértices (nós), e os caminhos que os conectam são representados como arestas (ligações), atribuindo-se um peso matemático a cada trajeto \cite{Stancel2021}.
+Para que a navegação seja computacionalmente viável, o ambiente físico deve ser
+abstraído em uma estrutura matemática de grafos. Grafos constituem estruturas 
+matemáticas altamente versáteis cuja função principal é modelar sistemas compostos 
+por entidades e pelas relações entre elas \cite{Goldbarg2012}. Em termos formais, 
+um grafo é formado por um conjunto de pontos, denominados vértices (ou nós), e 
+pelas ligações que os conectam, chamadas de arestas (quando não possuem orientação) 
+ou arcos (quando possuem direção) \cite{Goldbarg2012}. Na modelagem de roteamento 
+espacial, utilizam-se comumente grafos simples e não direcionados, garantindo que 
+a conexão entre dois vértices seja bidirecional --- permitindo o deslocamento de 
+ida e volta --- e que não existam laços conectando um vértice a ele mesmo 
+\cite{Goldbarg2012}. A viabilidade dessa modelagem especificamente para os 
+corredores do Senac foi comprovada empiricamente por \citeonline{BarrosoBrito2025}, 
+que representaram salas, escadas e corredores como vértices e suas conexões físicas 
+como arestas de um grafo não direcionado.
+A partir da noção de vizinhança, que ocorre quando existe uma aresta direta entre
+dois nós, algoritmos computacionais conseguem definir sequências de passos
+conhecidas como caminhos. Dessa forma, corredores e salas são representados como
+vértices (nós), e os caminhos que os conectam são representados como arestas
+(ligações), atribuindo-se um peso matemático a cada trajeto \cite{Stancel2021}.
 
-Nesse modelo, o algoritmo de Dijkstra, proposto originalmente em 1959, é o padrão-ouro para a determinação de caminhos mínimos em grafos ponderados \cite{Dijkstra1959}. O algoritmo expande os nós a partir de um vértice de origem, acumulando e validando os menores custos até alcançar os demais vértices do grafo, sob a condição de que os pesos das arestas sejam não negativos.
+Nesse modelo, o algoritmo de Dijkstra, proposto originalmente em 1959, é o
+padrão-ouro para a determinação de caminhos mínimos em grafos ponderados
+\cite{Cormen2009}. O algoritmo expande os nós a partir de um vértice de
+origem, acumulando e validando os menores custos até alcançar os demais vértices
+do grafo, sob a condição de que os pesos das arestas sejam não negativos.
 
-Apesar de sua excelência e completude matemática, o algoritmo de Dijkstra foi concebido para redes determinísticas, onde o custo da ligação é estático (como a distância em metros). No contexto prático de um Ambiente Dinâmico (DE), onde o peso da aresta inclui a qualidade variável do sinal Wi-Fi, o custo muda continuamente. Para manter a rota ótima frente a uma queda de sinal, o algoritmo tradicional demandaria recálculos iterativos completos da árvore de caminhos, gerando uma sobrecarga de processamento incompatível com o redirecionamento contínuo em tempo real \cite{Pham2025}.
+\begin{figure}[H]
+\centering
+\caption{Grafo ponderado não direcionado para execução do algoritmo de Dijkstra}
+\begin{tikzpicture}[
+    node/.style={
+        circle,
+        draw=black,
+        minimum size=0.7cm,
+        font=\small,
+        inner sep=2pt
+    },
+    arr/.style={
+        thick
+    },
+    lbl/.style={
+        font=\small,
+        inner sep=2pt,
+        fill=white
+    }
+]
+\node[node] (D) at (0,0)    {D};
+\node[node] (A) at (2, 2)   {A};
+\node[node] (B) at (4, 0.5) {B};
+\node[node] (C) at (7, 2)   {C};
+\node[node] (E) at (6, 0)   {E};
+\node[node] (F) at (3,-2)   {F};
+\node[node] (G) at (7,-2)   {G};
+
+\draw[arr] (D) -- node[lbl, above left]  {5} (A);
+\draw[arr] (D) -- node[lbl, above]       {9} (B);
+\draw[arr] (D) -- node[lbl, above]       {5} (E);
+\draw[arr] (D) -- node[lbl, below left]  {1} (F);
+\draw[arr] (A) -- node[lbl, above]       {2} (B);
+\draw[arr] (B) -- node[lbl, above]       {8} (C);
+\draw[arr] (B) -- node[lbl, right]       {1} (E);
+\draw[arr] (E) -- node[lbl, right]       {5} (C);
+\draw[arr] (E) -- node[lbl, right]       {1} (G);
+\draw[arr] (F) -- node[lbl, below]       {3} (E);
+\draw[arr] (F) -- node[lbl, below]       {1} (G);
+\end{tikzpicture}
+\label{fig:grafo-dijkstra}
+\legend{Fonte: Adaptado de \cite{ENADE2021} pelo autor (2026)}
+\end{figure}
+
+Apesar de sua excelência e completude matemática, o algoritmo de Dijkstra foi
+concebido para redes determinísticas, onde o custo da ligação é estático (como
+a distância em metros). No contexto prático de um Ambiente Dinâmico (DE), onde
+o peso da aresta inclui a qualidade variável do sinal Wi-Fi, o custo muda
+continuamente. Para manter a rota ótima frente a uma queda de sinal, o algoritmo
+tradicional demandaria recálculos iterativos completos da árvore de caminhos,
+gerando uma sobrecarga de processamento incompatível com o redirecionamento
+contínuo em tempo real \cite{Pham2025}.
 
 \subsection{Inteligência Artificial e Aprendizado por Reforço no Roteamento}
 
@@ -362,10 +472,10 @@ cada simulação serão definidos manualmente pelo pesquisador como nós do graf
 
 A contribuição da plataforma restringe-se, portanto, a duas entregas fundamentais:
 a topologia navegável do edifício, representada como um grafo de vértices e arestas
-com coordenadas geográficas reais, e o \textit{dataset} empírico de RSSI coletado
-corredor a corredor durante o \textit{site survey}, que constituirá a variável de
-custo dinâmico das arestas nos dois motores de roteamento \cite{IndoorAtlas2025}.
-
+com coordenadas geográficas reais \cite{Stancel2021}, e o \textit{dataset} empírico 
+de RSSI coletado corredor a corredor durante o \textit{site survey}, que constituirá 
+a variável de custo dinâmico das arestas nos dois motores de roteamento 
+\cite{IndoorAtlas2025}.
 
 \subsection{A Função de Custo: Distância e RSSI}
 
@@ -384,13 +494,17 @@ nas arestas. Para compor esses pesos de forma que o roteamento favoreça corredo
 melhor conectividade Wi-Fi sem ignorar completamente a distância física, este trabalho
 adota uma \textbf{média ponderada} como função de custo de cada aresta.
 
-O primeiro passo da formulação é a transformação do RSSI bruto em uma métrica positiva
-de penalidade. Como o RSSI opera em escala negativa --- valores mais próximos de zero
-indicam sinal melhor, enquanto valores mais negativos indicam sinal degradado
-\cite{Chia2025} --- é necessário invertê-lo em um custo proporcional à degradação do
-sinal. Para isso, aplica-se a normalização \textit{min-max}, técnica amplamente utilizada
-na literatura para converter leituras de RSSI em pesos de arestas em grafos de
-posicionamento \textit{indoor}:
+O primeiro passo da formulação é a transformação do RSSI bruto em uma métrica
+positiva de penalidade. Como o RSSI opera em escala negativa --- valores mais
+próximos de zero indicam sinal melhor, enquanto valores mais negativos indicam
+sinal degradado \cite{Chia2025} --- é necessário invertê-lo em um custo
+proporcional à degradação do sinal. Para isso, aplica-se a normalização
+\textit{min-max}, técnica de pré-processamento que transforma qualquer variável
+numérica para o intervalo $[0, 1]$ por meio da subtração do valor mínimo dividida
+pela amplitude total dos dados \cite{Han2011}. No presente trabalho, essa técnica
+é adaptada ao contexto de roteamento: em vez de normalizar diretamente o RSSI,
+inverte-se a escala para que valores de sinal degradado resultem em custo alto,
+e valores de sinal excelente resultem em custo baixo:
 
 $$ P_{RSSI}(u,v) = \frac{RSSI_{max} - \overline{RSSI}(u,v)}{RSSI_{max} - RSSI_{min}} $$
 
@@ -400,109 +514,38 @@ $RSSI_{min}$ é o melhor sinal registrado. Dessa forma, corredores com sinal exc
 recebem $P_{RSSI}$ próximo de 0 (baixo custo), enquanto corredores com sinal degradado
 recebem $P_{RSSI}$ próximo de 1 (alto custo).
 
-A distância física da aresta é igualmente normalizada para que ambas as variáveis operem
-na mesma escala $[0, 1]$:
+A distância física da aresta é igualmente normalizada para que ambas as variáveis
+operem na mesma escala $[0, 1]$, dividindo cada distância pelo maior valor de
+aresta presente no grafo \cite{Han2011}:
 
 $$ D_{norm}(u,v) = \frac{d(u,v)}{d_{max}} $$
 
 onde $d(u,v)$ é a distância real em metros entre os nós $u$ e $v$, e $d_{max}$ é a
 maior distância de aresta presente no grafo.
 
-Com ambas as variáveis normalizadas, a função de custo final da aresta é definida como
-uma média ponderada, proposta neste trabalho com peso majoritário atribuído à qualidade
-do sinal, dado que o objetivo central da pesquisa é priorizar a conectividade Wi-Fi:
+Com ambas as variáveis normalizadas, a função de custo final da aresta é definida
+como uma combinação linear ponderada. Essa abordagem --- denominada na literatura
+como \textit{Weighted Sum-Dijkstra's Algorithm} (WSDA) --- consiste em agregar
+múltiplos critérios normalizados por meio de pesos que refletem a prioridade de
+cada variável, permitindo que o algoritmo de Dijkstra opere sobre um custo
+composto em vez de um único critério \cite{Hua2018}. No presente trabalho, a
+formulação é adaptada para o contexto de roteamento \textit{indoor} com dois
+critérios: a qualidade do sinal Wi-Fi e a distância física, com peso majoritário
+atribuído ao sinal, dado que o objetivo central da pesquisa é priorizar a
+conectividade:
 
 $$ C_{Dijkstra}(u,v) = 0{,}7 \cdot P_{RSSI}(u,v) + 0{,}3 \cdot D_{norm}(u,v) $$
 
 A distribuição de 70\% para o sinal e 30\% para a distância constitui a hipótese
-inicial deste trabalho e será submetida a ajuste empírico durante a fase de calibração,
-caso os resultados preliminares indiquem necessidade de revisão.
-
-\subsubsection*{Função de Custo e Ambiente de Treinamento para o \textit{Q-Learning}}
-
-O \textit{Q-Learning} não opera sobre pesos estáticos. Em vez disso, ele aprende o
-custo de cada aresta por meio da interação repetida com um \textbf{ambiente simulado
-estocástico}, que reproduz as flutuações reais do sinal Wi-Fi observadas nos corredores
-do Senac. A construção desse ambiente é o que diferencia fundamentalmente a abordagem
-da IA do método determinístico.
-
-\textbf{Protocolo de coleta empírica:} Para construir esse ambiente com fidelidade
-estatística, o \textit{dataset} de RSSI será coletado ao longo de \textbf{três semanas},
-em \textbf{três dias por semana}, com medições realizadas em \textbf{dois horários
-distintos} por dia: entre 18h00 e 19h00 (antes do início das aulas, com baixo fluxo
-de pessoas) e entre 20h50 e 21h20 (durante o intervalo, com alto fluxo de pessoas).
-Esse protocolo foi desenhado para capturar a variabilidade estocástica real do sinal
-descrita por \citeonline{Chia2025}, que demonstra que fatores como a circulação de
-pessoas e o ruído eletromagnético causam flutuações sistemáticas e mensuráveis no
-RSSI de corredores internos.
-
-\textbf{Extração das métricas estatísticas:} Ao final do período de coleta, para cada
-aresta $(u,v)$ do grafo, serão extraídas duas métricas do conjunto de leituras de RSSI
-registradas naquele corredor:
-\begin{itemize}
-    \item $\mu(u,v)$: a \textbf{média aritmética} das leituras, representando o nível
-    típico de sinal naquele trecho;
-    \item $\sigma(u,v)$: o \textbf{desvio padrão} das leituras, representando a
-    volatilidade ou instabilidade do sinal naquele trecho.
-\end{itemize}
-
-\textbf{Simulação do ambiente dinâmico:} A cada episódio de treinamento do agente,
-o custo de cada aresta não é fixo, mas sim \textbf{amostrado dinamicamente} a partir
-de uma distribuição normal:
-
-$$ RSSI_{sim}(u,v) \sim \mathcal{N}\left(\mu(u,v),\, \sigma^2(u,v)\right) $$
-
-onde:
-\begin{itemize}
-    \item $RSSI_{sim}(u,v)$ é o valor de sinal \textbf{simulado} para a aresta entre
-    os nós $u$ e $v$ em um determinado episódio de treinamento;
-    \item $\mathcal{N}$ denota a \textbf{distribuição normal} (gaussiana), escolhida
-    por ser o modelo estatístico que melhor representa as flutuações do sinal RSSI em
-    Ambientes Dinâmicos, nos quais variações são simétricas em torno de um valor médio
-    \cite{Chia2025};
-    \item $\mu(u,v)$ é a \textbf{média aritmética} das leituras de RSSI coletadas
-    empiricamente naquele corredor durante o protocolo de coleta, representando o
-    nível típico de sinal naquele trecho;
-    \item $\sigma^2(u,v)$ é a \textbf{variância} das leituras coletadas naquele
-    corredor, representando a volatilidade ou instabilidade do sinal. Corredores com
-    alto fluxo de pessoas tendem a apresentar maior variância, simulando com fidelidade
-    as condições reais de degradação descritas por \citeonline{Chia2025}.
-\end{itemize}
-
-Dessa forma, a cada novo episódio, o agente enfrenta uma realização diferente do
-ambiente, aprendendo a tomar decisões robustas não para um único valor fixo de sinal,
-mas para toda a distribuição de condições possíveis observadas empiricamente naquele
-corredor.
-Essa abordagem é mais fiel à realidade do que sortear valores uniformemente em um
-intervalo $[min, max]$, pois o RSSI real tende a se concentrar em torno de um valor
-médio com variações simétricas, comportamento característico de uma distribuição
-normal em ambientes dinâmicos \cite{Chia2025}. Dessa forma, o agente é exposto a
-condições que refletem tanto os momentos de boa conectividade quanto os episódios
-de degradação severa do sinal observados empiricamente.
-
-\textbf{Função de recompensa:} A partir do $RSSI_{sim}$ amostrado, a função de
-recompensa $R$ do agente é definida como:
-
-$$
-R(u,v) =
-\begin{cases}
-    +10 & \text{se } RSSI_{sim}(u,v) \geq -60 \text{ dBm (sinal aceitável)} \\
-    -10 & \text{se } RSSI_{sim}(u,v) < -60 \text{ dBm (zona de sombra)} \\
-    +50 & \text{se o agente alcança o nó de destino}
-\end{cases}
-$$
-
-Essa estrutura de recompensa força o agente a aprender, ao longo dos episódios de
-treinamento, quais corredores apresentam sinal estável e quais representam zonas de
-risco, consolidando esse conhecimento na Tabela Q.
+inicial deste trabalho e será submetida a ajuste empírico durante a fase de
+calibração, caso os resultados preliminares indiquem necessidade de revisão.
 
 \subsection{Implementação do Algoritmo de Dijkstra}
 
 O algoritmo de Dijkstra será implementado como a abordagem de base
-(\textit{baseline}) deste estudo. Trata-se de um algoritmo de busca não informada
-que garante a descoberta do caminho de menor custo entre um nó de origem e todos
-os outros nós de um grafo, desde que os pesos das arestas sejam não negativos
-\cite{Dijkstra1959}.
+(\textit{baseline}) deste estudo. Trata-se de um algoritmo de busca não informada que garante a descoberta 
+do caminho de menor custo entre um nó de origem e todos os outros nós de 
+um grafo, desde que os pesos das arestas sejam não negativos \cite{Cormen2009}.
 
 \subsubsection*{Entrada: o Grafo Ponderado}
 
@@ -554,6 +597,81 @@ A complexidade de tempo do algoritmo com fila de prioridade é $O((V + A) \log V
 onde $V$ é o número de vértices e $A$ é o número de arestas do grafo
 \cite{Cormen2009}.
 
+\subsubsection*{Função de Custo e Ambiente de Treinamento para o \textit{Q-Learning}}
+
+O \textit{Q-Learning} não opera sobre pesos estáticos. Em vez disso, ele aprende o
+custo de cada aresta por meio da interação repetida com um \textbf{ambiente simulado
+estocástico}, que reproduz as flutuações reais do sinal Wi-Fi observadas nos corredores
+do Senac. A construção desse ambiente é o que diferencia fundamentalmente a abordagem
+da IA do método determinístico.
+
+\textbf{Protocolo de coleta empírica:} Para construir esse ambiente com fidelidade
+estatística, o \textit{dataset} de RSSI será coletado ao longo de \textbf{três semanas},
+em \textbf{três dias por semana}, com medições realizadas em \textbf{dois horários
+distintos} por dia: entre 18h00 e 19h00 (antes do início das aulas, com baixo fluxo
+de pessoas) e entre 20h50 e 21h20 (durante o intervalo, com alto fluxo de pessoas),
+conforme definido na Seção \ref{sec:objetivo}. Esse protocolo foi desenhado para
+capturar a variabilidade estocástica real do sinal descrita por \citeonline{Chia2025},
+que demonstra que fatores como a circulação de pessoas e o ruído eletromagnético
+causam flutuações sistemáticas e mensuráveis no RSSI de corredores internos.
+
+\textbf{Extração das métricas estatísticas:} Ao final do período de coleta, para cada
+aresta $(u,v)$ do grafo, serão extraídas três métricas do conjunto de leituras de RSSI
+registradas naquele corredor:
+\begin{itemize}
+    \item $\overline{RSSI}(u,v)$: a \textbf{média aritmética} das leituras,
+    representando o nível típico de sinal naquele trecho;
+    \item $RSSI_{min}(u,v)$ e $RSSI_{max}(u,v)$: os valores \textbf{mínimo e máximo}
+    observados naquele corredor, delimitando o intervalo real de variação do sinal
+    empiricamente registrado.
+\end{itemize}
+
+\textbf{Simulação do ambiente dinâmico:} A cada episódio de treinamento do agente,
+o valor de RSSI de cada aresta não é fixo, mas sim \textbf{amostrado aleatoriamente}
+dentro do intervalo empiricamente observado para aquele corredor. Durante a elaboração
+deste trabalho, foi realizada uma pesquisa na literatura em busca de um modelo
+probabilístico que representasse com fidelidade a variação real do sinal RSSI em
+ambientes \textit{indoor} dinâmicos. Não foi identificada, contudo, uma distribuição
+consensual que refletisse adequadamente esse comportamento, dado que a variação do
+sinal é fortemente dependente das características físicas e do fluxo de pessoas de
+cada ambiente específico \cite{Chia2025}. Diante disso, optou-se por uma abordagem
+conservadora, construindo o ambiente de simulação exclusivamente a partir dos limites
+observados nos dados empíricos coletados:
+
+$$ RSSI_{sim}(u,v) \sim U\left(RSSI_{min}(u,v),\; RSSI_{max}(u,v)\right) $$
+
+onde:
+\begin{itemize}
+    \item $RSSI_{sim}(u,v)$ é o valor de sinal simulado para a aresta entre os nós
+    $u$ e $v$ em um determinado episódio de treinamento;
+    \item $U(a, b)$ denota a distribuição uniforme contínua no intervalo $[a, b]$,
+    garantindo que qualquer valor dentro da amplitude real de variação observada
+    naquele corredor possa ocorrer com igual probabilidade;
+    \item $RSSI_{min}(u,v)$ e $RSSI_{max}(u,v)$ são os valores mínimo e máximo
+    registrados empiricamente naquele corredor durante o protocolo de coleta,
+    delimitando o intervalo real de flutuação do sinal.
+\end{itemize}
+
+O agente é assim exposto a toda a amplitude real de variação do sinal registrada
+nos corredores do Senac, aprendendo a tomar decisões robustas para qualquer
+condição dentro desse intervalo observado, sem extrapolações além do que foi medido.
+
+\textbf{Função de recompensa:} A partir do $RSSI_{sim}$ amostrado, a função de
+recompensa $R$ do agente é definida como:
+
+$$
+R(u,v) =
+\begin{cases}
+    +10 & \text{se } RSSI_{sim}(u,v) \geq -60 \text{ dBm (sinal aceitável)} \\
+    -10 & \text{se } RSSI_{sim}(u,v) < -60 \text{ dBm (zona de sombra)} \\
+    +50 & \text{se o agente alcança o nó de destino}
+\end{cases}
+$$
+
+Essa estrutura de recompensa força o agente a aprender, ao longo dos episódios de
+treinamento, quais corredores apresentam sinal estável e quais representam zonas de
+risco, consolidando esse conhecimento na Tabela Q \cite{Sutton2018}.
+
 \subsection{Implementação do Algoritmo \textit{Q-Learning}}
 
 O \textit{Q-Learning} será implementado como a abordagem de Inteligência Artificial
@@ -595,7 +713,7 @@ tripla:
 O núcleo do aprendizado reside em uma estrutura matricial denominada \textbf{Tabela
 Q} (\textit{Q-Table}), onde cada célula $Q(s, a)$ armazena a estimativa acumulada
 de recompensa futura associada a tomar a ação $a$ a partir do estado $s$
-\cite{BoyanLittman1994}. No início do treinamento, todos os valores da Tabela Q são
+\cite{Sutton2018}. No início do treinamento, todos os valores da Tabela Q são
 inicializados em zero, representando o estado de ignorância total do agente sobre
 o ambiente.
 
@@ -688,12 +806,12 @@ Nesta seção, detalham-se três trabalhos que compartilham o foco direto na res
 
 \subsection{Trabalho 2: Reinforcement learning based estimation of shortest paths in dynamically changing transportation networks}
 
-\citeonline{Pham2025} investigaram as limitações dos algoritmos tradicionais de roteamento (como Dijkstra e A*) frente a ambientes dinâmicos e estocásticos, nos quais os custos de locomoção flutuam constantemente devido a eventos imprevistos do mundo real. A abordagem consistiu na implementação do \textit{Q-Learning} para capacitar o sistema a descobrir rotas ótimas de forma autônoma através de interações contínuas e acúmulo de experiência. Os resultados demonstraram que a Inteligência Artificial estima as melhores rotas com a mesma exatidão matemática do Dijkstra sob condições de incerteza. (\textit{online}) para $O(1)$, viabilizando tomadas de decisão instantâneas. A limitação deste estudo, contudo, reside em seu escopo de aplicação: o foco recaiu estritamente sobre a navegação \textit{outdoor} em larga escala (tráfego veicular), utilizando o congestionamento de trânsito como o peso dinâmico. O presente trabalho diferencia-se por transpor a eficiência matemática do \textit{Q-Learning} para o micromapeamento \textit{indoor}, substituindo o tráfego de veículos pela flutuação estocástica do sinal Wi-Fi como a variável de penalidade da rede.
+\citeonline{Pham2025} investigaram as limitações dos algoritmos tradicionais de roteamento (como Dijkstra e A*) frente a ambientes dinâmicos e estocásticos, nos quais os custos de locomoção flutuam constantemente devido a eventos imprevistos do mundo real. A abordagem consistiu na implementação do \textit{Q-Learning} para capacitar o sistema a descobrir rotas ótimas de forma autônoma através de interações contínuas e acúmulo de experiência. Os resultados demonstraram que a Inteligência Artificial estima as melhores rotas com a mesma exatidão matemática do Dijkstra sob condições de incerteza. A limitação deste estudo, contudo, reside em seu escopo de aplicação: o foco recaiu estritamente sobre a navegação \textit{outdoor} em larga escala (tráfego veicular), utilizando o congestionamento de trânsito como o peso dinâmico. O presente trabalho diferencia-se por transpor a eficiência matemática do \textit{Q-Learning} para o micromapeamento \textit{indoor}, substituindo o tráfego de veículos pela flutuação estocástica do sinal Wi-Fi como a variável de penalidade da rede.
 
 \subsection{Trabalho 3: The Challenge of Dynamic Environments in Regard to RSSI-Based Indoor Wi-Fi Positioning}
 
 % ATENÇÃO: Substitua "AutorRevisao2025" pela chave correta do seu arquivo .bib
-\citeonline{Chia2025} avaliaram a vulnerabilidade do sinal Wi-Fi (RSSI) em relação a fatores externos em Ambientes Dinâmicos (DE), como obstáculos físicos, ruído ambiental e interferência de múltiplos caminhos. A metodologia englobou uma Revisão Sistemática da Literatura (RSL) sobre 128 artigos acadêmicos (2018--2024) para mensurar o impacto do caos ambiental nas tecnologias de posicionamento baseadas em rádio e testar a eficácia de algoritmos de \textit{Machine Learning} (ML) e \textit{Deep Learning} (DL). Os resultados comprovaram que o desempenho \textit{indoor} sofre degradação drástica devido a fatores dinâmicos de movimentação estrutural e humana, causando atenuação e reflexão. Adicionalmente, atestou-se que modelos tradicionais de ML falham sob estas condições, exigindo o rigor do DL para contornar incertezas. A limitação da literatura analisada na RSL, no entanto, é o foco exclusivo na descoberta da coordenada isolada do usuário (\textit{fingerprinting} de localização), sem a aplicação direta em descoberta de caminhos. O presente trabalho diferencia-se por utilizar essa degradação atestada do sinal Wi-Fi não como um problema de classificação de localização, mas sim como a matriz de custo dinâmico dentro de um algoritmo de roteamento.
+\citeonline{Chia2025} avaliaram a vulnerabilidade do sinal Wi-Fi (RSSI) em relação a fatores externos em Ambientes Dinâmicos (DE), como obstáculos físicos, ruído ambiental e interferência de múltiplos caminhos. A metodologia englobou uma Revisão Sistemática da Literatura (RSL) sobre 128 artigos acadêmicos (2018--2024) para mensurar o impacto do caos ambiental nas tecnologias de posicionamento baseadas em rádio e testar a eficácia de algoritmos de \textit{Machine Learning} (ML) e \textit{Deep Learning} (DL). Os resultados comprovaram que o desempenho \textit{indoor} sofre degradação drástica devido a fatores dinâmicos de movimentação estrutural e humana, causando atenuação e reflexão. Adicionalmente, atestou-se que modelos tradicionais de ML enfrentam desafios e frequentemente exigem re-treinamento sob estas condições, exigindo o rigor do DL para contornar incertezas. A limitação da literatura analisada na RSL, no entanto, é o foco exclusivo na descoberta da coordenada isolada do usuário (\textit{fingerprinting} de localização), sem a aplicação direta em descoberta de caminhos. O presente trabalho diferencia-se por utilizar essa degradação atestada do sinal Wi-Fi não como um problema de classificação de localização, mas sim como a matriz de custo dinâmico dentro de um algoritmo de roteamento.
 
 \vspace{0.5cm}
 
@@ -780,41 +898,181 @@ A seguir, detalham-se os pilares que compõem a abordagem:
         pelo Dijkstra.
     \end{enumerate}
 
-    \item \textbf{Tecnologias e ferramentas}: 
-    A linguagem base para a codificação das simulações será o \textbf{Python}, justificada por sua liderança e robustez na manipulação de matrizes para Inteligência Artificial. A abstração estrutural do grafo e a varredura dos vértices serão conduzidas através da biblioteca \textbf{NetworkX}. O processamento estatístico do \textit{dataset} de sinal empregará as bibliotecas \textbf{Pandas} e \textbf{NumPy}.
-    
-    Para a obtenção da malha física e do sinal Wi-Fi bruto, utilizar-se-á a \textbf{\textit{IndoorAtlas REST API}}. O emprego desta plataforma como base de simulação possui validação técnica estabelecida por \citeonline{Stancel2021}. No cenário nacional, \citeonline{Mendes2016} atestaram a eficácia desta tecnologia no Instituto Federal Farroupilha para a extração de assinaturas de rádio sem a exigência de acréscimo de \textit{hardware} na infraestrutura do \textit{campus}.
+\item \textbf{Tecnologias e ferramentas:} A linguagem adotada para a implementação
+da simulação será o \textbf{Python}. A escolha é respaldada por sua consolidação
+como a linguagem mais utilizada em computação científica, ciência de dados e
+Inteligência Artificial, sendo a única que combina alta legibilidade com acesso
+direto a bibliotecas de baixo nível de alto desempenho \cite{Raschka2020}. Essa
+característica é determinante para este trabalho, que exige tanto a manipulação
+matricial da Tabela Q quanto o processamento estatístico do \textit{dataset} de
+RSSI em um único ambiente de desenvolvimento.
 
-    \item \textbf{Funcionalidades principais}: Para atender aos objetivos propostos e solucionar o problema de baixa conectividade Wi-Fi durante a locomoção no Senac, a solução executará as seguintes funções:
+Para a representação e varredura do grafo $G = (V, A)$, será utilizada a biblioteca
+\textbf{NetworkX} \cite{Hagberg2008}, que fornece estruturas de dados nativas para
+grafos ponderados e implementações prontas de algoritmos de caminhos mínimos,
+incluindo o próprio Dijkstra. O processamento estatístico do \textit{dataset} de
+RSSI --- cálculo de médias, desvios padrão e remoção de \textit{outliers} ---
+será conduzido com as bibliotecas \textbf{Pandas} e \textbf{NumPy}, componentes
+centrais do ecossistema científico do Python \cite{Raschka2020}.
+
+Para a obtenção da malha física e dos dados brutos de RSSI, será utilizada a
+\textbf{IndoorAtlas REST API} \cite{IndoorAtlas2025}. O emprego desta plataforma
+como base de mapeamento e coleta possui validação técnica estabelecida por
+\citeonline{Stancel2021} e, no cenário nacional, por \citeonline{Mendes2016}, que
+atestaram sua eficácia na extração de assinaturas de rádio sem a necessidade de
+instalação de hardware adicional na infraestrutura do ambiente estudado.
+
+    \item \textbf{Funcionalidades principais}: Para atender aos objetivos propostos e solucionar o problema de locomoção \textit{indoor} mantendo conectividade Wi-Fi, a solução executará as seguintes funções:
     \begin{itemize}
-        \item O mapeamento da topologia e a coleta contínua da potência do sinal Wi-Fi (RSSI) nos corredores do Senac via \textit{IndoorAtlas} ao longo de um período de tempo [a ser definido];
-        \item O cálculo da rota ideal pelo algoritmo de Dijkstra, utilizando como peso das arestas a distância em metros atrelada a uma consolidação matemática do sinal RSSI [métrica agregada a ser definida];
+        \item O mapeamento da topologia e a coleta contínua da potência do sinal Wi-Fi (RSSI) nos corredores do Senac via \textit{IndoorAtlas} ao longo de um período de tempo três semanas;
+        \item O cálculo da rota ideal pelo algoritmo de Dijkstra, utilizando como peso das arestas a distância em metros atrelada a uma consolidação matemática do sinal RSSI;
         \item A modelagem do ambiente de Aprendizado por Reforço e o treinamento do algoritmo de \textit{Q-Learning} (fornecendo o grafo, os estados, as ações e a função de recompensa);
         \item A predição autônoma da melhor rota possível pela Inteligência Artificial após a consolidação do seu aprendizado;
         \item A geração de um comparativo final de sucesso e eficiência entre a abordagem determinística (Dijkstra) e a IA.
     \end{itemize}
 
-    \item \textbf{Metodologia de desenvolvimento}: Adotar-se-á uma abordagem quantitativa, experimental e iterativa. O ciclo inicia-se pela coleta em campo (\textit{site survey}) da variação estocástica do RSSI no Senac. A viabilidade da captura dessas impressões digitais de rádio (\textit{fingerprinting}) na referida instituição possui embasamento local prévio comprovado por \citeonline{Claro2022}. Com a base de dados consolidada, os algoritmos serão codificados e submetidos a ciclos de calibração paramétrica (como o ajuste da taxa de aprendizado, $\alpha$, e do fator de desconto, $\gamma$, da IA) até a estabilização matemática dos resultados.
+\item \textbf{Metodologia de desenvolvimento:} A implementação seguirá uma
+abordagem experimental e iterativa, organizada em três etapas sequenciais. Na
+primeira, será realizada a coleta presencial do RSSI nos corredores do Senac,
+conforme o protocolo de duas semanas definido na Seção 2.3.2. A viabilidade dessa
+coleta na instituição possui embasamento prévio comprovado por \citeonline{Claro2022},
+que realizou levantamento de impressões digitais de rádio no mesmo ambiente. Na
+segunda etapa, os dados brutos serão tratados estatisticamente e o grafo ponderado
+será construído conforme descrito nos Módulos 1 e 2 da arquitetura. Na terceira,
+os dois algoritmos serão implementados e submetidos a ciclos de ajuste paramétrico
+--- calibrando a taxa de aprendizado $\alpha$ e o fator de desconto $\gamma$ do
+\textit{Q-Learning} --- até a estabilização dos resultados.
 
-    \item \textbf{Critérios de validação}: A eficácia comparativa será validada mediante uma Bateria de Testes controlada, submetendo os dois motores lógicos a cenários probabilísticos distintos: o "Cenário de Controle" (ausência de queda abrupta de sinal) e o "Cenário de Estresse" (simulação matemática de flutuações e degradações com base nos piores quartis do \textit{dataset}). Alicerçada na taxonomia acadêmica de avaliação algorítmica utilizada por \citeonline{Pham2025}, a performance de cada abordagem será julgada estritamente pelas métricas de: \textit{Completude} (capacidade absoluta de encontrar uma rota sem falhas), \textit{Grau de Otimização} (proporção minimizada entre conectividade e distância em metros), \textit{Complexidade de Tempo} de execução de máquina ($O$) e \textit{Complexidade de Espaço} (alocação de memória na matriz).
+\item \textbf{Critérios de validação:} A eficácia comparativa será avaliada por
+meio de uma bateria de testes controlada, submetendo os dois motores de roteamento
+a dois cenários distintos: o \textbf{Cenário de Controle}, no qual os valores de
+RSSI amostrados refletem condições estáveis de sinal, e o \textbf{Cenário de
+Estresse}, no qual os valores são amostrados a partir dos piores quartis do
+\textit{dataset}, simulando degradações severas de conectividade. Com base nos
+critérios de avaliação de algoritmos de roteamento adotados por \citeonline{Pham2025},
+o desempenho de cada abordagem será medido por quatro métricas: \textit{Completude}
+(capacidade de encontrar uma rota válida em todos os cenários), \textit{Grau de
+Otimização} (qualidade da rota encontrada em termos de conectividade e distância),
+\textit{Complexidade de Tempo} (custo computacional de execução, expresso em
+notação $O$) e \textit{Complexidade de Espaço} (memória alocada durante a
+execução).
+
 \end{itemize}
 
-Para ilustrar a estrutura macro de processamento e execução da simulação, a Figura \ref{fig:arquitetura} apresenta o fluxo arquitetural da solução.
-
+Para ilustrar a estrutura macro de processamento e execução da simulação, a Figura
+\ref{fig:arquitetura} apresenta o fluxo arquitetural da solução.
 \begin{figure}[H]
-    \centering
-    \caption{Fluxo do Ambiente Computacional de Simulação}
-    \label{fig:arquitetura}
-    % Substitua o arquivo 'arquitetura.png' pela imagem real do seu diagrama gerada futuramente.
-    % \includegraphics[width=0.8\textwidth]{figuras/arquitetura.png}
-    \fbox{\rule{0pt}{3in} \rule{0.8\textwidth}{0pt}} 
-    \legend{Fonte: Elaborado pelo autor (2026)}
+\centering
+\caption{Fluxo do Ambiente Computacional de Simulação}
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    box/.style={
+        rectangle,
+        rounded corners=6pt,
+        minimum width=4.2cm,
+        minimum height=1.4cm,
+        text centered,
+        font=\scriptsize,
+        inner sep=6pt
+    },
+    teal/.style={
+        box,
+        draw=teal!80!black,
+        fill=teal!35
+    },
+    purple/.style={
+        box,
+        draw=violet!80!black,
+        fill=violet!30
+    },
+    coral/.style={
+        box,
+        draw=orange!80!red,
+        fill=orange!30
+    },
+    gray/.style={
+        box,
+        draw=gray!70,
+        fill=gray!20
+    },
+    sub/.style={
+        font=\tiny,
+        text=gray!60!black,
+        text centered
+    },
+    arr/.style={
+        -{Stealth[length=4pt]},
+        thick,
+        gray!70!black
+    }
+]
+
+\node[teal] (m1) {%
+    \begin{tabular}{c}
+        \textbf{Módulo 1}\\
+        Coleta e mapeamento
+    \end{tabular}
+};
+
+\node[teal, right=2.5cm of m1] (m2) {%
+    \begin{tabular}{c}
+        \textbf{Módulo 2}\\
+        Estruturação lógica
+    \end{tabular}
+};
+
+\node[sub, below=0.2cm of m1] (s1) {IndoorAtlas · RSSI · grafo $G=(V,A)$};
+\node[sub, below=0.2cm of m2] (s2) {$\mu$ · $\sigma$ · $P_{RSSI}$ · $C_{Dijkstra}$};
+
+\draw[arr] (m1.east) -- (m2.west);
+
+\node[purple] (m3) at ($(m1) + (0,-4.5cm)$) {%
+    \begin{tabular}{c}
+        \textbf{Motor determinístico}\\
+        Algoritmo de Dijkstra
+    \end{tabular}
+};
+
+\node[coral] (m4) at ($(m2) + (0,-4.5cm)$) {%
+    \begin{tabular}{c}
+        \textbf{Motor estocástico}\\
+        \textit{Q-Learning}
+    \end{tabular}
+};
+
+\node[sub, below=0.2cm of m3] (s3) {Pesos estáticos · $C_{Dijkstra}$ fixo};
+\node[sub, below=0.2cm of m4] (s4) {$\mathcal{N}(\mu,\sigma^2)$ · Tabela Q · $\varepsilon$-\textit{greedy}};
+
+\coordinate (bifurc) at ($(m2.south) + (0,-1.8cm)$);
+
+\draw[arr] (m2.south) -- (bifurc);
+\draw[arr] (bifurc) -| (m3.north);
+\draw[arr] (bifurc) -| (m4.north);
+
+\node[gray] (mf) at ($(m3)!0.5!(m4) + (0,-4.2cm)$) {%
+    \begin{tabular}{c}
+        \textbf{Comparativo final}\\
+        Completude · otimização · tempo · espaço
+    \end{tabular}
+};
+
+\coordinate (conv) at ($(mf.north) + (0,0.8cm)$);
+
+\draw[arr] (m3.south) -- ++(0,-1.0cm) -| (conv) -- (mf.north);
+\draw[arr] (m4.south) -- ++(0,-1.0cm) -| (conv) -- (mf.north);
+
+\end{tikzpicture}
+\label{fig:arquitetura}
+\legend{Fonte: Elaborado pelo autor (2026)}
 \end{figure}
+
 % ---------------------------------------------------------------
 \section{Cronograma de trabalho}
 \label{sec:cronograma}
 
-O cronograma a seguir apresenta, no formato de diagrama de Gantt, as atividades previstas para o desenvolvimento do TCC2, distribuídas ao longo das semanas do semestre.
+O cronograma a seguir apresenta, no formato de diagrama de Gantt, as atividades
+previstas para o desenvolvimento do TCC2, distribuídas ao longo das semanas do
+semestre.
 
 \begin{figure}[htb]
     \centering
@@ -836,14 +1094,11 @@ O cronograma a seguir apresenta, no formato de diagrama de Gantt, as atividades 
         canvas/.append style={draw=black!20},
     ]{1}{17}
 
-        % Cabeçalho com semanas numeradas
         \gantttitle{Semanas}{17} \\
         \gantttitlelist{1,...,17}{1} \\
 
-        % Atividades
         \ganttbar{IndoorAtlas e Mapeamento do Senac}{1}{1} \\
-        \ganttbar{Coleta de Dados}{2}{2}
-        \ganttbar{}{5}{7} \\
+        \ganttbar{Coleta de Dados}{2}{4} \\
         \ganttbar{Limpeza de Dados}{4}{4} \\
         \ganttbar{Implementação do Dijkstra}{5}{6} \\
         \ganttbar{Criação Ambiente Simulado}{7}{8} \\
@@ -855,15 +1110,16 @@ O cronograma a seguir apresenta, no formato de diagrama de Gantt, as atividades 
         \ganttbar{TCC Monografia}{4}{15} \\
         \ganttbar{Revisão Final Latex}{16}{16}
 
-        % Ligações entre atividades
         \ganttlink{elem0}{elem1}
-        \ganttlink{elem1}{elem3}
+        \ganttlink{elem1}{elem2}
+        \ganttlink{elem2}{elem3}
         \ganttlink{elem3}{elem4}
-        \ganttlink{elem3}{elem5}
+        \ganttlink{elem4}{elem5}
         \ganttlink{elem5}{elem6}
+        \ganttlink{elem6}{elem7}
         \ganttlink{elem7}{elem8}
-        \ganttlink{elem9}{elem10}
-        \ganttlink{elem11}{elem12}
+        \ganttlink{elem8}{elem9}
+        \ganttlink{elem10}{elem11}
 
     \end{ganttchart}
     \legend{Fonte: Elaborado pelo autor (2026)}
