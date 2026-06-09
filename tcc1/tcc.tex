@@ -126,7 +126,7 @@ André Luis Ferreira de Oliveira}
 % RESUMO
 % ---------------------------------------------------------------
 \begin{resumo}
-Este documento apresenta a proposta inicial do Trabalho de Conclusão de Curso (TCC1) desenvolvido no Centro Universitário SENAC Santo Amaro. O objetivo deste trabalho é comparar a eficácia do algoritmo determinístico de Dijkstra com um modelo de Inteligência Artificial baseado em Aprendizado por Reforço (\textit{Q-Learning}) na otimização de rotas internas, utilizando a estabilidade do sinal Wi-Fi (RSSI) como variável de custo dinâmico. A justificativa para este estudo baseia-se na ineficácia do GPS em espaços fechados e na vulnerabilidade de abordagens clássicas de roteamento estático frente às flutuações estocásticas de sinais sem fio em Ambientes Dinâmicos (DE). A revisão bibliográfica abrange as limitações dos sistemas de posicionamento \textit{indoor} (IPS), a teoria dos grafos aplicada à descoberta de caminhos, a métrica RSSI e os fundamentos do roteamento adaptativo (\textit{Q-Routing}). Como solução proposta, pretende-se inicialmente modelar os corredores do Prédio Acadêmico I da instituição como uma rede de grafos, compilar um banco de dados empírico das variações do sinal Wi-Fi através da plataforma \textit{IndoorAtlas} e submeter ambos os algoritmos a testes comparativos sob duas condições: cenários de controle (representando estabilidade de conexão) e cenários de estresse (simulando quedas abruptas de sinal e congestionamento de rede), provando a capacidade da IA em priorizar a conectividade em detrimento da distância física. Este trabalho está organizado em capítulos que apresentam a introdução ao tema, a revisão bibliográfica que fundamenta a pesquisa, o desenvolvimento com a solução proposta e o cronograma de trabalho, seguidos das referências bibliográficas.
+Este documento apresenta a proposta inicial do Trabalho de Conclusão de Curso (TCC1) desenvolvido no Centro Universitário SENAC Santo Amaro. O objetivo deste trabalho é comparar a eficácia do algoritmo determinístico de Dijkstra com um modelo de Inteligência Artificial (IA) baseado em Aprendizado por Reforço (RL) na otimização de rotas internas, utilizando a estabilidade do sinal Wi-Fi como variável de custo dinâmico. A justificativa para este estudo baseia-se na ineficácia do Sistema de Posicionamento Global (GPS) em espaços fechados e na vulnerabilidade de abordagens clássicas de roteamento estático frente às flutuações estocásticas de sinais sem fio em Ambientes Dinâmicos (DE). A revisão bibliográfica abrange as limitações dos sistemas de posicionamento \textit{indoor}, a teoria dos grafos aplicada à descoberta de caminhos, a métrica Received Signal Strength Indicator (RSSI) e os fundamentos do roteamento adaptativo (\textit{Q-Routing}). Como solução proposta, pretende-se inicialmente modelar os corredores do Prédio Acadêmico I da instituição como uma rede de grafos, compilar um banco de dados empírico das variações do sinal Wi-Fi através da plataforma \textit{IndoorAtlas} e submeter ambos os algoritmos a testes comparativos sob duas condições: cenários de controle (representando estabilidade de conexão) e cenários de estresse (simulando quedas abruptas de sinal e congestionamento de rede), provando a capacidade da IA em priorizar a conectividade em detrimento da distância física. Este trabalho está organizado em capítulos que apresentam a introdução ao tema, a revisão bibliográfica que fundamenta a pesquisa, o desenvolvimento com a solução proposta e o cronograma de trabalho, seguidos das referências bibliográficas.
 
 \vspace{\onelineskip}
 
@@ -149,6 +149,37 @@ Este documento apresenta a proposta inicial do Trabalho de Conclusão de Curso (
 \cleardoublepage
 
 % ---------------------------------------------------------------
+% LISTA DE ABREVIATURAS E SIGLAS
+% ---------------------------------------------------------------
+\begin{siglas}
+  \item[A*] Algoritmo de busca informada heurística (\textit{A-star})
+  \item[API] \textit{Application Programming Interface} (Interface de Programação de Aplicações)
+  \item[BSSID] \textit{Basic Service Set Identifier} (Identificador único de ponto de acesso Wi-Fi)
+  \item[dBm] Decibéis por miliwatt
+  \item[DE] \textit{Dynamic Environment} (Ambiente Dinâmico)
+  \item[DL] \textit{Deep Learning} (Aprendizado Profundo)
+  \item[GPS] Sistema de Posicionamento Global
+  \item[IA] Inteligência Artificial
+  \item[IEEE] \textit{Institute of Electrical and Electronics Engineers}
+  \item[IPS] \textit{Indoor Positioning System} (Sistema de Posicionamento \textit{Indoor})
+  \item[JPEG] \textit{Joint Photographic Experts Group} (formato de imagem digital)
+  \item[MAC] \textit{Media Access Control} (endereço físico único de dispositivos de rede)
+  \item[MCDM] \textit{Multi-Criteria Decision Making} (Tomada de Decisão por Múltiplos Critérios)
+  \item[MDP] \textit{Markov Decision Process} (Processo de Decisão de Markov)
+  \item[ML] \textit{Machine Learning} (Aprendizado de Máquina)
+  \item[PNG] \textit{Portable Network Graphics} (formato de imagem digital)
+  \item[REST API] \textit{Representational State Transfer Application Programming Interface}
+  \item[RL] \textit{Reinforcement Learning} (Aprendizado por Reforço)
+  \item[RSL] Revisão Sistemática da Literatura
+  \item[RSSI] \textit{Received Signal Strength Indicator} (Indicador de Força do Sinal Recebido)
+  \item[TD] \textit{Temporal Difference} (Diferença Temporal)
+  \item[TCC1] Trabalho de Conclusão de Curso 1
+  \item[TCC2] Trabalho de Conclusão de Curso 2
+  \item[VISSIM] \textit{Verkehr in Städten -- SIMulationsmodell} (software de microssimulação de tráfego)
+  \item[WSDA] \textit{Weighted Sum-Dijkstra's Algorithm} (Algoritmo de Soma Ponderada de Dijkstra)
+\end{siglas}
+
+% ---------------------------------------------------------------
 % SUMÁRIO
 % ---------------------------------------------------------------
 \pdfbookmark[0]{\contentsname}{toc}
@@ -168,7 +199,7 @@ Este documento apresenta a proposta inicial do Trabalho de Conclusão de Curso (
 
 O sistema de posicionamento e navegação em ambientes externos (\textit{outdoor}) consolidou-se como uma tecnologia altamente eficiente, fornecendo a localização precisa de objetos e usuários por meio de sinais de satélite, como o Sistema de Posicionamento Global (GPS). No entanto, esse método opera de forma eficaz apenas em áreas abertas com linha de visão direta. Quando o usuário adentra edifícios, os sinais sofrem interferência severa ou bloqueio completo por paredes e telhados, tornando o GPS ineficaz para navegação interna \cite{Chia2025,BarrosoBrito2025}. 
 
-Para solucionar a navegação nesses espaços fechados, \citeonline{Stancel2021} afirmam que o mundo real pode ser mapeado computacionalmente através de um grafo de vértices e arestas. A viabilidade dessa modelagem estrutural especificamente para os corredores do Senac já foi comprovada empiricamente por \citeonline{BarrosoBrito2025}. A partir dessa modelagem, algoritmos clássicos de teoria dos grafos, como Dijkstra e A*, são muito bem-sucedidos ao definir a menor rota para redes com custos de arestas estáticos. Entretanto, no contexto prático real, os custos das arestas mudam dinamicamente.
+Para solucionar a navegação nesses espaços fechados, \citeonline{Stancel2021} afirmam que o mundo real pode ser mapeado computacionalmente através de um grafo de vértices e arestas. A viabilidade dessa modelagem estrutural especificamente para os corredores do Senac já foi comprovada empiricamente por \citeonline{BarrosoBrito2025}. A partir dessa modelagem, algoritmos clássicos de teoria dos grafos, como Dijkstra e Algoritmo de busca informada heurística (A*), são muito bem-sucedidos ao definir a menor rota para redes com custos de arestas estáticos. Entretanto, no contexto prático real, os custos das arestas mudam dinamicamente.
 
 Sendo assim, essas abordagens tradicionais apresentam várias limitações 
 em cenários onde os custos de ligação mudam dinamicamente --- como 
@@ -176,24 +207,24 @@ a evitar congestionamentos em redes de transporte \cite{Pham2025}
 ou, no contexto deste trabalho, a manutenção de uma conectividade Wi-Fi 
 estável em ambientes indoor.
 
-Para \citeonline{Pham2025}, algoritmos baseados em aprendizado por reforço computam ótimos resultados quando tratamos de redes que mudam dinamicamente. Dessa forma, este estudo propõe realizar um comparativo prático no Centro Universitário Senac entre o algoritmo determinístico de Dijkstra e um modelo de Inteligência Artificial (IA) baseado em Aprendizado por Reforço (RL), utilizando como pesos das arestas a distância física (metros) e a qualidade do sinal baseada no Received Signal Strength Indicator (RSSI).
+Para \citeonline{Pham2025}, algoritmos baseados em aprendizado por reforço (RL) computam ótimos resultados quando tratamos de redes que mudam dinamicamente. Dessa forma, este estudo propõe realizar um comparativo prático no Centro Universitário Senac entre o algoritmo determinístico de Dijkstra e um modelo de Inteligência Artificial (IA) baseado em RL, utilizando como pesos das arestas a distância física (metros) e a qualidade do sinal baseada no Received Signal Strength Indicator (RSSI).
 
 % ---------------------------------------------------------------
 
 \section{Contexto}
 \label{sec:contexto}
 
-O desenvolvimento de sistemas de posicionamento e navegação revolucionou a mobilidade e a interação espacial na sociedade contemporânea. Em ambientes externos (\textit{outdoor}), tecnologias baseadas em constelações de satélites, como o Sistema de Posicionamento Global (GPS), consolidaram-se como soluções altamente eficientes para o rastreamento preciso de usuários. No entanto, a eficácia desse método restringe-se a áreas abertas com linha de visão direta. Quando o indivíduo adentra edifícios e complexos arquitetônicos fechados, os sinais de rádio sofrem interferência severa ou bloqueio total por estruturas físicas, como paredes e lajes, tornando o GPS ineficaz para a navegação interna (\textit{indoor}) \cite{Chia2025, BarrosoBrito2025}.
+O desenvolvimento de sistemas de posicionamento e navegação revolucionou a mobilidade e a interação espacial na sociedade contemporânea. Em ambientes externos (\textit{outdoor}), tecnologias baseadas em constelações de satélites, como o GPS, consolidaram-se como soluções altamente eficientes para o rastreamento preciso de usuários. No entanto, a eficácia desse método restringe-se a áreas abertas com linha de visão direta. Quando o indivíduo adentra edifícios e complexos arquitetônicos fechados, os sinais de rádio sofrem interferência severa ou bloqueio total por estruturas físicas, como paredes e lajes, tornando o GPS ineficaz para a navegação interna (\textit{indoor}) \cite{Chia2025, BarrosoBrito2025}.
 
-Para viabilizar o deslocamento nesses espaços fechados, a literatura e a indústria têm recorrido a infraestruturas locais preexistentes, com destaque para a utilização de redes sem fio (Wi-Fi). Computacionalmente, o ambiente físico de uma instituição pode ser mapeado e abstraído por meio de uma estrutura de grafos, composta por vértices e arestas que representam os cruzamentos e os corredores \cite{Stancel2021}. Para quantificar o peso ou custo dessas arestas visando a manutenção da conectividade, a métrica de Indicador de Força do Sinal Recebido (RSSI), expressa em decibéis por miliwatt (dBm), estabeleceu-se como um padrão de medição. 
+Para viabilizar o deslocamento nesses espaços fechados, a literatura e a indústria têm recorrido a infraestruturas locais preexistentes, com destaque para a utilização de redes sem fio (Wi-Fi). Computacionalmente, o ambiente físico de uma instituição pode ser mapeado e abstraído por meio de uma estrutura de grafos, composta por vértices e arestas que representam os cruzamentos e os corredores \cite{Stancel2021}. Para quantificar o peso ou custo dessas arestas visando a manutenção da conectividade, a métrica de RSSI, expressa em decibéis por miliwatt (dBm), estabeleceu-se como um padrão de medição. 
 
 Entretanto, o domínio físico em que esse sistema opera caracteriza-se por ser um Ambiente Dinâmico (DE - \textit{Dynamic Environment}). Em instituições de grande porte, o fluxo estocástico de pessoas, a movimentação de mobiliário, o ruído eletromagnético e a interferência de múltiplos caminhos (\textit{multipath interference}) causam flutuações constantes na propagação do sinal. Consequentemente, a força do sinal Wi-Fi torna-se altamente vulnerável à atenuação, resultando em uma métrica de custo dinâmico e instável \cite{Chia2025}.
 
 A existência desse fenômeno dinâmico expõe uma lacuna crítica nas abordagens computacionais de roteamento. Algoritmos clássicos da teoria dos grafos, como o método de Dijkstra, são amplamente utilizados e comprovadamente ótimos para definir a menor rota em redes onde os custos das arestas são estáticos. Contudo, em um cenário prático e real, as abordagens determinísticas tradicionais apresentam limitações severas, pois são incapazes de adaptar o roteamento de forma reativa a custos de ligação que mudam em tempo real \cite{Pham2025}.
 
-A incapacidade de resolver essa assimetria entre algoritmos estáticos e ambientes dinâmicos afeta diretamente os usuários finais que dependem de navegação assistida e conectividade ininterrupta em amplas instalações. A principal consequência de ignorar essas flutuações é a geração de rotas que, apesar de geograficamente mais curtas, direcionam o indivíduo para "zonas de sombra" ou áreas de alta atenuação de rede.
+A incapacidade de resolver essa assimetria entre algoritmos estáticos e ambientes dinâmicos (DE) afeta diretamente os usuários finais que dependem de navegação assistida e conectividade ininterrupta em amplas instalações. A principal consequência de ignorar essas flutuações é a geração de rotas que, apesar de geograficamente mais curtas, direcionam o indivíduo para "zonas de sombra" ou áreas de alta atenuação de rede.
 
-Diante desse cenário, o estudo de métodos adaptativos evidencia sua relevância. Para a sociedade, garante uma experiência de navegação contínua e conectada. Para a Ciência da Computação, preenche a lacuna metodológica identificada na literatura atual, investigando como técnicas emergentes de Inteligência Artificial --- especificamente o Aprendizado por Reforço, capaz de lidar com a dinamicidade de redes de forma autônoma --- podem superar os limites dos algoritmos estáticos no roteamento em ambientes complexos \cite{Pham2025}.
+Diante desse cenário, o estudo de métodos adaptativos evidencia sua relevância. Para a sociedade, garante uma experiência de navegação contínua e conectada. Para a Ciência da Computação, preenche a lacuna metodológica identificada na literatura atual, investigando como técnicas emergentes de IA --- especificamente o RL, capaz de lidar com a dinamicidade de redes de forma autônoma --- podem superar os limites dos algoritmos estáticos no roteamento em ambientes complexos \cite{Pham2025}.
 
 % ---------------------------------------------------------------
 \section{Justificativa}
@@ -201,11 +232,11 @@ Diante desse cenário, o estudo de métodos adaptativos evidencia sua relevânci
 
 A motivação para o desenvolvimento deste trabalho fundamenta-se na necessidade de adequar os sistemas de roteamento \textit{indoor} à realidade estocástica das infraestruturas de rede modernas. Historicamente, o problema de caminhos mínimos tem sido tratado sob uma ótica estática, o que se mostra insuficiente frente às flutuações inerentes a ambientes com alta circulação. Diante disso, a pertinência desta pesquisa sustenta-se sob três pilares fundamentais: a identificação de uma lacuna na literatura, a sua relevância acadêmica e a sua aplicabilidade prática.
 \begin{itemize}
-    \item \textbf{Relevância acadêmica}: Este trabalho contribui diretamente para o avanço do conhecimento na intersecção entre a Teoria dos Grafos e a Inteligência Artificial. Ao propor um comparativo empírico entre um algoritmo determinístico clássico (Dijkstra) e um modelo adaptativo (\textit{Q-Learning}) sob a aplicação de princípios de engenharia de caos --- prática metodológica que consiste na injeção intencional de anomalias e falhas controladas (como a degradação abrupta do sinal Wi-Fi) para testar a resiliência do sistema ---, a pesquisa não se limita a revisar conceitos existentes. Ela fornece dados práticos sobre o comportamento, a convergência e a resiliência de modelos de RL na mitigação de flutuações do sinal RSSI. Essa abordagem eleva a discussão acadêmica ao demonstrar como a variabilidade do ambiente pode ser tratada matematicamente não como um ruído impeditivo, mas como uma variável de custo penalizadora na função de recompensa de um agente inteligente.
+    \item \textbf{Relevância acadêmica}: Este trabalho contribui diretamente para o avanço do conhecimento na intersecção entre a Teoria dos Grafos e a IA. Ao propor um comparativo empírico entre um algoritmo determinístico clássico (Dijkstra) e um modelo adaptativo (\textit{Q-Learning}) sob a aplicação de princípios de engenharia de caos --- prática metodológica que consiste na injeção intencional de anomalias e falhas controladas (como a degradação abrupta do sinal Wi-Fi) para testar a resiliência do sistema ---, a pesquisa não se limita a revisar conceitos existentes. Ela fornece dados práticos sobre o comportamento, a convergência e a resiliência de modelos de RL na mitigação de flutuações do sinal RSSI. Essa abordagem eleva a discussão acadêmica ao demonstrar como a variabilidade do ambiente pode ser tratada matematicamente não como um ruído impeditivo, mas como uma variável de custo penalizadora na função de recompensa de um agente inteligente.
     
     \item \textbf{Relevância prática/profissional}: No âmbito aplicado, os benefícios gerados por esta solução impactam diretamente a experiência dos usuários e a gestão de infraestrutura de instituições de grande porte. O desenvolvimento de um sistema de roteamento inteligente permitirá que transeuntes --- sejam alunos, funcionários ou visitantes do Centro Universitário Senac --- desloquem-se pelas dependências do campus de maneira otimizada. A solução proposta garante não apenas a indicação do caminho fisicamente viável, mas, primordialmente, a manutenção da conectividade com a internet durante todo o trajeto. Evitar a transição por "zonas de sombra" previne a interrupção de aplicações em tempo real, chamadas de vídeo e transmissões de dados, agregando um valor operacional direto para a comunidade e servindo como um modelo escalável para hospitais, aeroportos e polos corporativos.
 
-    \item \textbf{Lacuna identificada}: A revisão da literatura atual revela uma escassez significativa de estudos que abordem o roteamento físico sob a perspectiva dos Ambientes Dinâmicos (DE). Conforme apontado por \citeonline{Chia2025}, a grande maioria das pesquisas sobre posicionamento \textit{indoor} baseado em Wi-Fi ignora as flutuações contínuas do ambiente, assumindo premissas de estabilidade que não se verificam no mundo real. Paralelamente, embora os métodos de Aprendizado por Reforço (RL) sejam amplamente consolidados para o cálculo de rotas dinâmicas em redes lógicas de computadores, o seu potencial para redes de transporte físico e navegação humana começou a atrair atenção apenas recentemente \cite{Pham2025}. Desse modo, carece-se de estudos empíricos que unam essas técnicas de Inteligência Artificial à otimização de caminhos guiados por fatores dinâmicos de infraestrutura.
+    \item \textbf{Lacuna identificada}: A revisão da literatura atual revela uma escassez significativa de estudos que abordem o roteamento físico sob a perspectiva dos DE. Conforme apontado por \citeonline{Chia2025}, a grande maioria das pesquisas sobre posicionamento \textit{indoor} baseado em Wi-Fi ignora as flutuações contínuas do ambiente, assumindo premissas de estabilidade que não se verificam no mundo real. Paralelamente, embora os métodos de RL sejam amplamente consolidados para o cálculo de rotas dinâmicas em redes lógicas de computadores, o seu potencial para redes de transporte físico e navegação humana começou a atrair atenção apenas recentemente \cite{Pham2025}. Desse modo, carece-se de estudos empíricos que unam essas técnicas de Inteligência Artificial à otimização de caminhos guiados por fatores dinâmicos de infraestrutura.
 \end{itemize}
 % ---------------------------------------------------------------
 \section{Objetivo}
@@ -247,7 +278,7 @@ Este capítulo apresenta a fundamentação teórica que sustenta o desenvolvimen
 
 A complexidade de localizar e guiar usuários em ambientes fechados difere
 drasticamente da navegação \textit{outdoor}. Enquanto espaços abertos dependem
-do Sistema de Posicionamento Global (GPS), a infraestrutura \textit{indoor}
+do GPS, a infraestrutura \textit{indoor}
 exige tecnologias locais devido à severa atenuação que os sinais de satélite
 sofrem ao atravessar barreiras arquitetônicas. Para contornar esse desafio
 tecnológico, \citeonline{Stancel2021} demonstram que o posicionamento indoor pode ser viabilizado
@@ -258,7 +289,7 @@ adicional no dispositivo do usuário.
 
 A principal métrica extraída dessa rede é o \textit{Received Signal Strength
 Indicator} (RSSI), que quantifica a força do sinal recebido por um dispositivo
-móvel. O valor do RSSI é expresso em decibéis por miliwatt (dBm) e é comumente
+móvel. O valor do RSSI é expresso em dBm e é comumente
 lido em espectros negativos, onde valores mais próximos de zero indicam maior
 qualidade de conexão.
 
@@ -272,8 +303,7 @@ qualidade de conexão.
 
 Contudo, a literatura aponta que a estabilidade dessa métrica é altamente
 vulnerável. Segundo \citeonline{Chia2025}, espaços internos fechados e com alto
-fluxo de usuários são classificados como Ambientes Dinâmicos (DE ---
-\textit{Dynamic Environments}). Nesses cenários, fatores físicos --- como o
+fluxo de usuários são classificados como Ambientes Dinâmicos. Nesses cenários, fatores físicos --- como o
 bloqueio do sinal pela circulação de massas humanas --- e de rede --- como
 interferência de múltiplos caminhos (\textit{multipath
 interference}) --- geram flutuações constantes e quedas abruptas no nível do
@@ -361,7 +391,7 @@ do grafo, sob a condição de que os pesos das arestas sejam não negativos.
 
 Apesar de sua excelência e completude matemática, o algoritmo de Dijkstra foi
 concebido para redes determinísticas, onde o custo da ligação é estático (como
-a distância em metros). No contexto prático de um Ambiente Dinâmico (DE), onde
+a distância em metros). No contexto prático de um Ambiente Dinâmico, onde
 o peso da aresta inclui a qualidade variável do sinal Wi-Fi, o custo muda
 continuamente. Para manter a rota ótima frente a uma queda de sinal, o algoritmo
 tradicional demandaria recálculos iterativos completos da árvore de caminhos,
@@ -370,7 +400,7 @@ contínuo em tempo real \cite{Pham2025}.
 
 \subsection{Inteligência Artificial e Aprendizado por Reforço no Roteamento}
 
-Para solucionar a incapacidade dos métodos clássicos em lidar com o "caos" dos ambientes dinâmicos, a pesquisa recorre à Inteligência Artificial (IA), com foco estrito no Aprendizado por Reforço (RL - \textit{Reinforcement Learning}). É imperativo distinguir essa abordagem de outras ramificações da IA, como o Aprendizado Profundo (\textit{Deep Learning}). Enquanto as redes neurais são frequentemente usadas no problema de reconhecimento de posições passivas (\textit{Fingerprinting}), o RL é projetado especificamente para a tomada de decisão sequencial e ativa em ambientes com incertezas \cite{Sutton2018}.
+Para solucionar a incapacidade dos métodos clássicos em lidar com o "caos" dos ambientes dinâmicos, a pesquisa recorre à IA, com foco estrito no Aprendizado por Reforço. É imperativo distinguir essa abordagem de outras ramificações da IA, como o Aprendizado Profundo (DL). Enquanto as redes neurais são frequentemente usadas no problema de reconhecimento de posições passivas (\textit{Fingerprinting}), o RL é projetado especificamente para a tomada de decisão sequencial e ativa em ambientes com incertezas \cite{Sutton2018}.
 
 Conforme a literatura recente sobre estimação de rotas, os métodos baseados em RL não necessitam conhecer os custos de ligação de antemão para iniciar a operação em uma rede que muda dinamicamente \cite{Pham2025}. O sistema computacional atua como um agente que mapeia e aprende os caminhos ótimos estritamente por meio de tentativa, erro e interação contínua com o ambiente. Em cenários estocásticos, a aplicação de RL permite que a navegação se adapte em tempo real, mitigando a variabilidade do ambiente sem o alto custo computacional do recálculo estático.
 
@@ -403,6 +433,30 @@ A seguir são apresentados os principais tópicos que nortearam a condução des
     \item \textbf{Período de abrangência}: Últimos 5 anos (publicações a partir de 2021).
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \caption{Diagrama de pesquisa bibliografica}
+    \includegraphics[width=1.0\textwidth]{img/Diagrama.png}
+    \legend{Fonte: Elaborado pelo autor (2026)}
+    \label{fig:diagrama}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \caption{Critérios de inclusão}
+    \includegraphics[width=0.5\textwidth]{img/CriteriosInclusao.png}
+    \legend{Fonte: Elaborado pelo autor (2026)}
+    \label{fig:criterios_inclusao}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \caption{Critérios de exclusão}
+    \includegraphics[width=0.5\textwidth]{img/CriteriosExclusao.png}
+    \legend{Fonte: Elaborado pelo autor (2026)}
+    \label{fig:criterios_exclusao}
+\end{figure}
+
 % ---------------------------------------------------------------
 \section{Fundamentos}
 \label{sec:fundamentos}
@@ -428,11 +482,11 @@ essas variações e as envia ao serviço, que as compara com um banco de dados d
 para estimar a posição do dispositivo.
 
 A segunda fonte de dados é o sinal Wi-Fi. Conforme especificado na documentação oficial
-da plataforma, a \textit{Positioning REST API} do \textit{IndoorAtlas} opera lendo as
-varreduras Wi-Fi do dispositivo, compostas por uma lista dos endereços MAC
+da plataforma, a Positioning \textit{REST API} (\textit{Application Programming Interface}) do 
+IndoorAtlas opera lendo as varreduras Wi-Fi. do dispositivo, compostas por uma lista dos endereços Media Access Control (MAC)
 (\textit{BSSIDs}) dos pontos de acesso detectados e os respectivos valores de força de
 sinal, expressos em RSSI (em dBm) \cite{IndoorAtlas2025}. Esses valores são enviados ao
-endpoint \texttt{/locate} da API, que retorna as coordenadas geográficas, o número do andar
+endpoint \texttt{/locate} da Application Programming Interface (API), que retorna as coordenadas geográficas, o número do andar
 e o raio de incerteza da posição calculada \cite{IndoorAtlas2025}. Na prática, isso
 significa que a cada varredura o sistema registra, para cada corredor, quais redes Wi-Fi
 estão visíveis e com qual intensidade de sinal, construindo o \textit{dataset} empírico de
@@ -483,7 +537,7 @@ Em problemas de roteamento, cada aresta de um grafo possui um custo (ou peso) qu
 orienta o algoritmo na escolha do melhor caminho. Na abordagem tradicional, esse custo
 é puramente a distância física entre dois pontos. Na modelagem deste trabalho, a Função
 de Custo será composta por duas variáveis complementares: a distância em metros e a
-qualidade do sinal Wi-Fi, medida pelo \textit{Received Signal Strength Indicator} (RSSI).
+qualidade do sinal Wi-Fi, medida pelo RSSI.
 A seguir, detalha-se como essa função será aplicada de forma distinta em cada um dos
 dois motores de roteamento.
 
