@@ -831,10 +831,10 @@ Assim como descrito na Seção 2.1.4, a execução do modelo divide-se em duas f
 \begin{itemize}
     \item \textbf{Fase \textit{Offline} (Treinamento):} o agente percorre o grafo
     em múltiplos episódios simulados, recebendo valores de RSSI amostrados
-    dinamicamente de $\mathcal{N}(\mu(u,v), \sigma^2(u,v))$ a cada passo. Ao longo
+    dinamicamente de $U(RSSI_{min}(u,v), RSSI_{max}(u,v))$ a cada passo. Ao longo
     dos episódios, a Tabela Q converge para uma representação estável das qualidades
-    de cada corredor, incorporando a variabilidade estocástica do sinal observada
-    empiricamente;
+    de cada corredor, incorporando a amplitude real de variação do sinal observada
+    empiricamente; %alterado
 
     \item \textbf{Fase \textit{Online} (Inferência):} com a Tabela Q consolidada,
     o roteamento ocorre de forma imediata por simples consulta à matriz: o agente
@@ -929,13 +929,12 @@ A seguir, detalham-se os pilares que compõem a abordagem:
         de RSSI por corredor, contendo as leituras brutas coletadas nos dois horários
         de coleta.
 
-        \item \textbf{Módulo de Estruturação Lógica}: Os dados brutos de RSSI passam
-        por tratamento estatístico: remoção de leituras discrepantes, cálculo da média
-        $\mu(u,v)$ e do desvio padrão $\sigma(u,v)$ por aresta, e aplicação da
-        normalização \textit{min-max} para conversão em penalidade $P_{RSSI}(u,v)$.
-        Ao final desse módulo, cada aresta do grafo possui seu peso
-        $C_{Dijkstra}(u,v)$ calculado e pronto para consumo pelos motores de
-        roteamento.
+        \item \textbf{Módulo de Estruturação Lógica:} Os dados brutos de RSSI passam por
+        tratamento estatístico: remoção de leituras discrepantes, cálculo da média $\mu(u, v)$
+        e identificação dos valores mínimo $RSSI_{min}(u, v)$ e máximo $RSSI_{max}(u, v)$ por aresta,
+        e aplicação da normalização min-max para conversão em penalidade $P_{RSSI}(u, v)$. Ao final
+        desse módulo, cada aresta do grafo possui seu peso $C_{Dijkstra}(u, v)$ calculado e pronto
+        para consumo pelos motores de roteamento. %alterado
 
         \item \textbf{Motor Determinístico --- Dijkstra}: Recebe o grafo com pesos
         estáticos e executa o algoritmo de Dijkstra conforme descrito na Seção 2.3.3,
@@ -944,12 +943,12 @@ A seguir, detalham-se os pilares que compõem a abordagem:
         capacidade de reagir a variações do sinal durante a execução.
 
         \item \textbf{Motor Estocástico --- \textit{Q-Learning}}: Recebe o grafo e
-        os parâmetros estatísticos $\mu(u,v)$ e $\sigma(u,v)$ de cada aresta.
+        os limites empíricos $RSSI_{min}(u,v)$ e $RSSI_{max}(u,v)$ de cada aresta.
         Durante a fase de treinamento, simula um Ambiente Dinâmico amostrando os
-        valores de RSSI a partir de $\mathcal{N}(\mu(u,v), \sigma^2(u,v))$ a cada
+        valores de RSSI a partir de $U(RSSI_{min}(u,v), RSSI_{max}(u,v))$ a cada
         episódio, conforme descrito na Seção 2.3.2. Após a convergência da Tabela Q,
         executa a fase de inferência para os mesmos pares origem-destino utilizados
-        pelo Dijkstra.
+        pelo Dijkstra. %Alterado
     \end{enumerate}
 
 \item \textbf{Tecnologias e ferramentas:} A linguagem adotada para a implementação
@@ -1012,7 +1011,6 @@ notação $O$) e \textit{Complexidade de Espaço} (memória alocada durante a
 execução).
 
 \end{itemize}
-
 Para ilustrar a estrutura macro de processamento e execução da simulação, a Figura
 \ref{fig:arquitetura} apresenta o fluxo arquitetural da solução.
 \begin{figure}[H]
@@ -1076,7 +1074,7 @@ Para ilustrar a estrutura macro de processamento e execução da simulação, a 
 };
 
 \node[sub, below=0.2cm of m1] (s1) {IndoorAtlas · RSSI · grafo $G=(V,A)$};
-\node[sub, below=0.2cm of m2] (s2) {$\mu$ · $\sigma$ · $P_{RSSI}$ · $C_{Dijkstra}$};
+\node[sub, below=0.2cm of m2] (s2) {$\mu$ · $RSSI_{min}$ · $RSSI_{max}$ · $P_{RSSI}$ · $C_{Dijkstra}$};
 
 \draw[arr] (m1.east) -- (m2.west);
 
@@ -1095,7 +1093,7 @@ Para ilustrar a estrutura macro de processamento e execução da simulação, a 
 };
 
 \node[sub, below=0.2cm of m3] (s3) {Pesos estáticos · $C_{Dijkstra}$ fixo};
-\node[sub, below=0.2cm of m4] (s4) {$\mathcal{N}(\mu,\sigma^2)$ · Tabela Q · $\varepsilon$-\textit{greedy}};
+\node[sub, below=0.2cm of m4] (s4) {$U(RSSI_{min}, RSSI_{max})$ · Tabela Q · $\varepsilon$-\textit{greedy}};
 
 \coordinate (bifurc) at ($(m2.south) + (0,-1.8cm)$);
 
@@ -1119,7 +1117,6 @@ Para ilustrar a estrutura macro de processamento e execução da simulação, a 
 \label{fig:arquitetura}
 \legend{Fonte: Elaborado pelo autor (2026)}
 \end{figure}
-
 % ---------------------------------------------------------------
 \section{Cronograma de trabalho}
 \label{sec:cronograma}
